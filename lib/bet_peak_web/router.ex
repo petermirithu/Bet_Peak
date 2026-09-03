@@ -17,7 +17,7 @@ defmodule BetPeakWeb.Router do
   scope "/", BetPeakWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", HomeLive.Index
   end
 
   # Other scopes may use custom stacks.
