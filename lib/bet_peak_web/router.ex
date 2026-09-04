@@ -1,6 +1,8 @@
 defmodule BetPeakWeb.Router do
   use BetPeakWeb, :router
 
+  import BetPeakWeb.UserAuth
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -8,16 +10,17 @@ defmodule BetPeakWeb.Router do
     plug :put_root_layout, html: {BetPeakWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_current_scope_for_user
+    # plug BetPeakWeb.Plugs.AccountConfirmed
   end
 
   pipeline :api do
     plug :accepts, ["json"]
   end
 
-  scope "/", BetPeakWeb do
-    pipe_through :browser
-
-    live "/", HomeLive.Index
+  pipeline :account_confirmed do
+    plug :browser
+    plug BetPeakWeb.Plugs.AccountConfirmed
   end
 
   # Other scopes may use custom stacks.
@@ -40,5 +43,52 @@ defmodule BetPeakWeb.Router do
       live_dashboard "/dashboard", metrics: BetPeakWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
+  end
+
+  ## Authentication routes
+
+  scope "/", BetPeakWeb do
+    pipe_through [
+      :browser,
+      :require_authenticated_user,
+      :account_confirmed
+    ]
+
+    live_session :require_authenticated_user,
+      on_mount: [
+        {BetPeakWeb.UserAuth, :require_authenticated},
+        {BetPeakWeb.UserAuth, :mount_current_scope}
+      ] do
+      live "/", HomeLive.Index
+      live "/users/settings", UserLive.Settings, :edit
+      live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+    end
+
+    post "/users/update-password", UserSessionController, :update_password
+  end
+
+  # For verification of account only
+  scope "/", BetPeakWeb do
+    pipe_through [
+      :browser,
+      :require_authenticated_user
+    ]
+
+    get "/users/verify_account", VerifyAccountController, :index
+  end
+
+  scope "/", BetPeakWeb do
+    pipe_through [:browser]
+
+    live_session :current_user,
+      on_mount: [{BetPeakWeb.UserAuth, :mount_current_scope}] do
+      live "/users/register", UserLive.Registration, :new
+      live "/users/log-in", UserLive.Login, :new
+      live "/users/log-in/:token", UserLive.Confirmation, :new
+      # live "/users/confirm/account", UserLive.Confirmation, :new
+    end
+
+    post "/users/log-in", UserSessionController, :create
+    delete "/users/log-out", UserSessionController, :delete
   end
 end
