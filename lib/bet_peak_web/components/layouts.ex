@@ -33,41 +33,97 @@ defmodule BetPeakWeb.Layouts do
 
   slot :inner_block, required: true
 
+  def auth(assigns) do
+    ~H"""
+    <main
+      id="auth-shell"
+      class="min-h-screen bg-[#f6f4ee] text-[#161616] lg:grid lg:grid-cols-[minmax(22rem,0.88fr)_minmax(34rem,1.12fr)]"
+    >
+      <section class="relative min-h-52 overflow-hidden bg-[#080808] lg:sticky lg:top-0 lg:h-screen">
+        <img
+          src={~p"/images/premier_league.jpeg"}
+          alt="Football stars under the stadium lights"
+          class="absolute inset-0 size-full object-cover object-[center_32%] lg:object-center"
+        />
+        <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,8,8,0.05)_25%,rgba(8,8,8,0.92)_100%)]">
+        </div>
+        <div class="absolute inset-x-0 bottom-0 p-6 text-white sm:p-8 lg:p-12">
+          <div class="mb-4 hidden h-px w-14 bg-[#f4bf25] lg:block"></div>
+          <p class="hidden max-w-md text-3xl font-bold leading-tight lg:block">
+            Your front-row seat to every fixture.
+          </p>
+          <p class="mt-3 hidden max-w-sm text-sm leading-6 text-white/70 lg:block">
+            Follow the action, back your instincts, and stay close to the game.
+          </p>
+        </div>
+      </section>
+
+      <section class="relative flex min-h-[calc(100vh-13rem)] items-center px-5 py-10 sm:px-10 lg:min-h-screen lg:px-14 lg:py-14 xl:px-20">
+        <div class="mx-auto w-full max-w-xl">
+          <div class="mb-8 flex items-center justify-between">
+            <img
+              src={~p"/images/logo.png"}
+              alt="Bet Peak"
+              class="h-40 w-auto object-contain object-left mix-blend-multiply sm:h-14"
+            />
+            <span class="text-xs font-semibold tracking-[0.16em] text-[#161616]/40">
+              Peak odds. Max returns.
+            </span>
+          </div>
+          <div>
+            {render_slot(@inner_block)}
+          </div>
+          <p class="mt-8 flex items-center gap-2 text-xs text-[#161616]/45">
+            <.icon name="hero-shield-check-mini" class="size-4 text-[#947000]" />
+            Your details are encrypted and securely stored.
+          </p>
+        </div>
+      </section>
+    </main>
+    <.flash_group flash={@flash} />
+    """
+  end
+
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
-      </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
-            <.theme_toggle />
-          </li>
-          <li>
-            <a href="https://phoenix.hexdocs.pm/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </header>
-
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
+    <div class="drawer lg:drawer-open">
+      <input id="my-drawer-3" type="checkbox" class="drawer-toggle" />
+      <div class="drawer-content flex flex-col items-center justify-center">
+        <label for="my-drawer-3" class="btn drawer-button lg:hidden">
+          Open drawer
+        </label>
         {render_slot(@inner_block)}
       </div>
-    </main>
+      <div class="drawer-side">
+        <label for="my-drawer-3" aria-label="close sidebar" class="drawer-overlay"></label>
+        <ul class="menu bg-base-200 min-h-full w-80 p-4">
+          <h1 class="text-lg font-bold">Bet Peak</h1>
+          <li><a>Football</a></li>
+          <li><a>Baseball</a></li>
 
+          <ul class="menu menu-horizontal w-full relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
+            <%= if @current_scope do %>
+              <li>
+                {@current_scope.user.email}
+              </li>
+              <li>
+                <.link href={~p"/users/settings"}>Settings</.link>
+              </li>
+              <li>
+                <.link href={~p"/users/log-out"} method="delete">Log out</.link>
+              </li>
+            <% else %>
+              <li>
+                <.link href={~p"/users/register"}>Register</.link>
+              </li>
+              <li>
+                <.link href={~p"/users/log-in"}>Log in</.link>
+              </li>
+            <% end %>
+          </ul>
+        </ul>
+      </div>
+    </div>
     <.flash_group flash={@flash} />
     """
   end

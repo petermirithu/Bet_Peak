@@ -40,6 +40,7 @@ defmodule BetPeak.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:bcrypt_elixir, "~> 3.0"},
       {:phoenix, "~> 1.8.9"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.13"},
@@ -72,7 +73,9 @@ defmodule BetPeak.MixProject do
       {:gettext, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
-      {:bandit, "~> 1.5"}
+      {:bandit, "~> 1.5"},
+      {:mail, ">= 0.0.0"},
+      {:gen_smtp, "~> 1.2 or ~> 1.3"}
     ]
   end
 
