@@ -15,17 +15,17 @@ defmodule BetPeak.Sports do
 
   def save_sport(attrs) do
     %Sport{}
-    |> Sport.creation_changeset(attrs, [])
+    |> Sport.changeset(attrs, [])
     |> Repo.insert()
   end
 
   def change_sport_creation(sport, attrs \\ %{}, opts \\ []) do
-    Sport.creation_changeset(sport, attrs, opts)
+    Sport.changeset(sport, attrs, opts)
   end
 
   def update_sport(sport, attrs) do
     sport
-    |> Sport.creation_changeset(attrs, [])
+    |> Sport.changeset(attrs, [])
     |> Repo.update()
   end
 

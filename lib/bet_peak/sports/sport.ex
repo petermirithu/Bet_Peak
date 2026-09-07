@@ -7,13 +7,15 @@ defmodule BetPeak.Sports.Sport do
     field :description, :string
     field :active, :boolean, default: true
     field :slug, :string
-    field :user_id, :id
+
+    belongs_to :user, BetPeak.Accounts.User
+    has_many :teams, BetPeak.Teams.Teams
 
     timestamps(type: :utc_datetime)
   end
 
   @doc false
-  def creation_changeset(sport, attrs, _opts) do
+  def changeset(sport, attrs, _opts) do
     sport
     |> cast(attrs, [:name, :description, :active, :user_id])
     |> validate_required([:name, :description, :active, :user_id])
