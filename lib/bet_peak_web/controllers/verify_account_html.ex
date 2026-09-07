@@ -3,7 +3,7 @@ defmodule BetPeakWeb.VerifyAccountHTML do
 
   def index(assigns) do
     ~H"""
-    <Layouts.auth flash={@flash} current_scope={@current_scope} is_conf>
+    <Layouts.auth flash={@flash} current_scope={@current_scope}>
       <div class="mb-7">
         <h1 class="text-3xl font-extrabold leading-tight text-[#161616] sm:text-4xl">
           Verify account

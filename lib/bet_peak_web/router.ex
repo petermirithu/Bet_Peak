@@ -11,7 +11,6 @@ defmodule BetPeakWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_scope_for_user
-    # plug BetPeakWeb.Plugs.AccountConfirmed
   end
 
   pipeline :api do
@@ -21,6 +20,11 @@ defmodule BetPeakWeb.Router do
   pipeline :account_confirmed do
     plug :browser
     plug BetPeakWeb.Plugs.AccountConfirmed
+  end
+
+  pipeline :admin_protected do
+    plug :browser
+    plug BetPeakWeb.Plugs.AdminProtected
   end
 
   # Other scopes may use custom stacks.
@@ -54,7 +58,7 @@ defmodule BetPeakWeb.Router do
       :account_confirmed
     ]
 
-    live_session :require_authenticated_user,
+    live_session :signed_in_users,
       on_mount: [
         {BetPeakWeb.UserAuth, :require_authenticated},
         {BetPeakWeb.UserAuth, :mount_current_scope}
@@ -65,6 +69,25 @@ defmodule BetPeakWeb.Router do
     end
 
     post "/users/update-password", UserSessionController, :update_password
+  end
+
+  # Admin routes
+  scope "/", BetPeakWeb do
+    pipe_through [
+      :browser,
+      :require_authenticated_user,
+      :admin_protected,
+      :account_confirmed
+    ]
+
+    live_session :signed_in_admins,
+      on_mount: [
+        {BetPeakWeb.UserAuth, :require_authenticated},
+        {BetPeakWeb.UserAuth, :mount_current_scope}
+      ] do
+      live "/admin", AdminLive.Index
+      live "/admin/users", AdminLive.Users
+    end
   end
 
   # For verification of account only
@@ -85,7 +108,6 @@ defmodule BetPeakWeb.Router do
       live "/users/register", UserLive.Registration, :new
       live "/users/log-in", UserLive.Login, :new
       live "/users/log-in/:token", UserLive.Confirmation, :new
-      # live "/users/confirm/account", UserLive.Confirmation, :new
     end
 
     post "/users/log-in", UserSessionController, :create

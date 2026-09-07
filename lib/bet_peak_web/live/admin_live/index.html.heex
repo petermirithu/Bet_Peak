@@ -1,0 +1,140 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <section
+    id="admin-dashboard"
+    class="mx-auto w-full max-w-[96rem] px-4 py-6 sm:px-6 lg:px-8 lg:py-10"
+  >
+    <header class="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p class="mb-2 text-xs font-bold text-[#947000]">
+          Admin overview
+        </p>
+        <h1 class="text-3xl font-extrabold text-[#161616] sm:text-4xl">
+          Welcome back, {@current_scope.user.first_name}
+        </h1>
+        <p class="mt-2 text-sm text-[#161616]/55">
+          Here is what is happening across Bet Peak today.
+        </p>
+      </div>
+    </header>
+
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <article class="border rounded-2xl border-[#d8d3c8] bg-white p-5 shadow-[0_8px_28px_rgba(22,22,22,0.04)]">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-xs font-bold text-[#161616]/45">
+              Total users
+            </p>
+            <p class="mt-3 text-3xl font-extrabold text-[#161616]">{@stats.total}</p>
+          </div>
+          <div class="grid size-10 place-items-center bg-[#fff3c6] text-[#947000]">
+            <.icon name="hero-users" class="size-5" />
+          </div>
+        </div>
+        <p class="mt-5 border-t border-[#ece8de] pt-3 text-xs text-[#161616]/45">
+          All registered accounts
+        </p>
+      </article>
+
+      <article class="border rounded-2xl border-[#d8d3c8] bg-white p-5 shadow-[0_8px_28px_rgba(22,22,22,0.04)]">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-xs font-bold text-[#161616]/45">
+              Verified
+            </p>
+            <p class="mt-3 text-3xl font-extrabold text-[#161616]">{@stats.verified}</p>
+          </div>
+          <div class="grid size-10 place-items-center bg-emerald-50 text-emerald-700">
+            <.icon name="hero-check-badge" class="size-5" />
+          </div>
+        </div>
+        <p class="mt-5 border-t border-[#ece8de] pt-3 text-xs text-[#161616]/45">
+          Confirmed email addresses
+        </p>
+      </article>
+
+      <article class="border rounded-2xl border-[#d8d3c8] bg-white p-5 shadow-[0_8px_28px_rgba(22,22,22,0.04)]">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-xs font-bold text-[#161616]/45">
+              Administrators
+            </p>
+            <p class="mt-3 text-3xl font-extrabold text-[#161616]">{@stats.admins}</p>
+          </div>
+          <div class="grid size-10 place-items-center bg-[#161616] text-[#f4bf25]">
+            <.icon name="hero-shield-check" class="size-5" />
+          </div>
+        </div>
+        <p class="mt-5 border-t border-[#ece8de] pt-3 text-xs text-[#161616]/45">
+          Accounts with admin access
+        </p>
+      </article>
+
+      <article class="border rounded-2xl border-[#d8d3c8] bg-white p-5 shadow-[0_8px_28px_rgba(22,22,22,0.04)]">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-xs font-bold text-[#161616]/45">Pending</p>
+            <p class="mt-3 text-3xl font-extrabold text-[#161616]">{@stats.pending}</p>
+          </div>
+          <div class="grid size-10 place-items-center bg-amber-50 text-amber-700">
+            <.icon name="hero-clock" class="size-5" />
+          </div>
+        </div>
+        <p class="mt-5 border-t border-[#ece8de] pt-3 text-xs text-[#161616]/45">
+          Awaiting account verification
+        </p>
+      </article>
+    </div>
+
+    <div class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(18rem,0.55fr)]">
+      <section class="border rounded-2xl border-[#d8d3c8] bg-white shadow-[0_8px_28px_rgba(22,22,22,0.04)]">
+        <header class="flex items-center justify-between border-b border-[#ded9ce] px-5 py-4 sm:px-6">
+          <div>
+            <h2 class="font-extrabold text-[#161616]">Recent accounts</h2>
+            <p class="mt-0.5 text-xs text-[#161616]/45">Latest registered users</p>
+          </div>
+          <.link
+            navigate={~p"/admin/users"}
+            class="text-xs font-bold text-[#735700] hover:underline"
+          >
+            View all
+          </.link>
+        </header>
+
+        <div id="recent-users" class="divide-y divide-[#ece8de] rounded-2xl">
+          <div
+            :for={user <- @recent_users}
+            id={"recent-user-#{user.id}"}
+            class="flex items-center gap-3 px-5 py-4 sm:px-6"
+          >
+            <div class="grid size-10 rounded-2xl shrink-0 place-items-center bg-[#f4bf25] text-xs font-extrabold text-[#161616]">
+              {Helpers.user_initials(user)}
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-bold text-[#161616]">
+                {user.first_name} {user.last_name}
+              </p>
+              <p class="truncate text-xs text-[#161616]/45">{user.email}</p>
+            </div>
+            <div class="hidden text-right sm:block">
+              <p class="text-xs font-semibold capitalize text-[#161616]/60">{user.role}</p>
+              <p class="mt-0.5 text-[0.65rem] text-[#161616]/35">
+                {Helpers.format_date(user.inserted_at)}
+              </p>
+            </div>
+            <span
+              class={[
+                "size-2 shrink-0 rounded-2xl",
+                if(user.confirmed_at, do: "bg-emerald-500", else: "bg-amber-500")
+              ]}
+              title={if(user.confirmed_at, do: "Verified", else: "Pending")}
+            ></span>
+          </div>
+
+          <div :if={@recent_users == []} class="px-6 py-14 text-center text-sm text-[#161616]/45">
+            No accounts yet.
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+</Layouts.app>
