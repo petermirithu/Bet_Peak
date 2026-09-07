@@ -17,6 +17,7 @@ defmodule BetPeakWeb.AdminLive.Users do
      |> assign(form: nil)}
   end
 
+  @impl true
   def handle_event("select_user", %{"user_id" => user_id}, socket) do
     selected_user = Enum.find(socket.assigns.users, &(&1.id == String.to_integer(user_id)))
 
@@ -29,14 +30,17 @@ defmodule BetPeakWeb.AdminLive.Users do
     }
   end
 
+  @impl true
   def handle_event("close_user_modal", _params, socket) do
     {:noreply, assign(socket, :show_user_modal, false)}
   end
 
+  @impl true
   def handle_event("update_modal_operation", %{"operation" => operation}, socket) do
     {:noreply, assign(socket, :modal_operation, operation)}
   end
 
+  @impl true
   def handle_event("validate_user_access", %{"user" => user_params}, socket) do
     changeset =
       socket.assigns.selected_user
@@ -46,6 +50,7 @@ defmodule BetPeakWeb.AdminLive.Users do
     {:noreply, assign_form(socket, changeset)}
   end
 
+  @impl true
   def handle_event("save_user_access", %{"user" => user_params}, socket) do
     case Accounts.update_user_access(socket.assigns.selected_user, user_params) do
       {:ok, user} ->

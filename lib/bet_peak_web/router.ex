@@ -87,6 +87,7 @@ defmodule BetPeakWeb.Router do
       ] do
       live "/admin", AdminLive.Index
       live "/admin/users", AdminLive.Users
+      live "/admin/sports", AdminLive.Sports
     end
   end
 

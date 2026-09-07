@@ -187,6 +187,14 @@ defmodule BetPeakWeb.Layouts do
                     <.icon name="hero-users" class="size-5 text-[#f4bf25]" /> Users
                   </.link>
                 </li>
+                <li>
+                  <.link
+                    navigate={~p"/admin/sports"}
+                    class="flex h-11 items-center gap-3 px-3 text-sm font-semibold text-white/70 transition hover:bg-white/8 hover:text-white"
+                  >
+                    <.icon name="hero-play" class="size-5 text-[#f4bf25]" /> Sports
+                  </.link>
+                </li>
               </ul>
             <% end %>
           </nav>
