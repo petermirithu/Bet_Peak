@@ -76,12 +76,22 @@ config :phoenix_live_view,
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
 
-# config :bet_peak, BetPeak.Mailer,
-#   adapter: Swoosh.Adapters.SMTP,
-#   relay: "smtp.gmail.com",
-#   username: System.get_env("GMAIL_USER"),
-#   password: System.get_env("GMAIL_APP_PASSWORD"),
-#   port: 587,
-#   tls: :always,
-#   auth: :always,
-#   ssl: false
+config :bet_peak, BetPeak.Mailer,
+  adapter: Swoosh.Adapters.SMTP,
+  relay: "smtp.gmail.com",
+  username: System.get_env("GMAIL_USER"),
+  password: System.get_env("GMAIL_APP_PASSWORD"),
+  port: 587,
+  tls: :always,
+  tls_options: [
+    versions: [:"tlsv1.2", :"tlsv1.3"],
+    verify: :verify_peer,
+    cacerts: :public_key.cacerts_get(),
+    server_name_indication: ~c"smtp.gmail.com",
+    depth: 99,
+    customize_hostname_check: [
+      match_fun: :public_key.pkix_verify_hostname_match_fun(:https)
+    ]
+  ],
+  auth: :always,
+  ssl: false
