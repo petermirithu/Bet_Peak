@@ -9,6 +9,9 @@ defmodule BetPeak.Accounts do
   alias BetPeak.Accounts.{User, UserToken, UserNotifier}
 
   ## Database getters
+  def get_all_users() do
+    Repo.all(User)
+  end
 
   @doc """
   Gets a user by email.
@@ -59,6 +62,16 @@ defmodule BetPeak.Accounts do
 
   """
   def get_user!(id), do: Repo.get!(User, id)
+
+  def change_user_access(%User{} = user, attrs \\ %{}) do
+    User.access_changeset(user, attrs)
+  end
+
+  def update_user_access(%User{} = user, attrs) do
+    user
+    |> User.access_changeset(attrs)
+    |> Repo.update()
+  end
 
   ## User registration
 

@@ -116,7 +116,7 @@ defmodule BetPeakWeb.CoreComponents do
       """
     else
       ~H"""
-      <button class={@class} {@rest}>
+      <button class={[@class, "cursor-pointer"]} {@rest}>
         {render_slot(@inner_block)}
       </button>
       """
@@ -422,6 +422,71 @@ defmodule BetPeakWeb.CoreComponents do
         </div>
       </li>
     </ul>
+    """
+  end
+
+  attr :id, :string, default: nil
+  attr :field, Phoenix.HTML.FormField
+  attr :name, :any
+  attr :label, :string, default: nil
+  attr :value, :any
+  attr :disabled, :boolean, default: false
+  attr :errors, :list, default: []
+
+  attr :options, :list,
+    required: true,
+    doc:
+      "List of maps or tuples, e.g., [%{label: \"Option 1\", value: \"1\"}] or [{\"Option 1\", \"1\"}]"
+
+  attr :rest, :global
+
+  def radio_group(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
+    errors = if Phoenix.Component.used_input?(field), do: field.errors, else: []
+
+    assigns
+    |> assign(field: nil)
+    |> assign(:errors, Enum.map(errors, &translate_error(&1)))
+    |> assign_new(:id, fn -> field.id end)
+    |> assign_new(:name, fn -> field.name end)
+    |> assign_new(:value, fn -> field.value end)
+    |> assign_new(:disabled, fn -> field.disabled end)
+    |> radio_group()
+  end
+
+  def radio_group(assigns) do
+    ~H"""
+    <fieldset id={@id} class="w-full">
+      <legend :if={@label} class="mb-3 text-sm font-bold text-[#161616]">{@label}</legend>
+
+      <div class="grid grid-cols-2 gap-2" {@rest}>
+        <div :for={option <- @options}>
+          <% {opt_label, opt_value} =
+            case option do
+              {lbl, val} -> {lbl, val}
+              %{label: lbl, value: val} -> {lbl, val}
+              val -> {String.capitalize(to_string(val)), val}
+            end
+
+          checked = to_string(@value) == to_string(opt_value) %>
+          <label class="flex rounded-2xl min-h-12 w-full cursor-pointer items-center gap-3 border border-[#d8d3c8] bg-white px-3 transition hover:border-[#b28708] has-[:checked]:border-[#b28708] has-[:checked]:bg-[#fff8df]">
+            <input
+              type="radio"
+              id={"#{@id}-#{opt_value}"}
+              name={@name}
+              value={opt_value}
+              checked={checked}
+              disabled={@disabled}
+              class="radio radio-sm border-[#9f998d] text-[#b28708] checked:border-[#b28708] checked:bg-[#b28708]"
+            />
+            <span class="text-sm font-semibold text-[#161616]">{opt_label}</span>
+          </label>
+        </div>
+      </div>
+
+      <div :for={msg <- @errors} class="mt-2 text-sm text-red-600">
+        {msg}
+      </div>
+    </fieldset>
     """
   end
 

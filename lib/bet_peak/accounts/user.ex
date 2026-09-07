@@ -31,6 +31,12 @@ defmodule BetPeak.Accounts.User do
     |> validate_password(opts)
   end
 
+  def access_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:role, :is_superuser])
+    |> validate_required([:role, :is_superuser])
+  end
+
   defp format_first_last_name(changeset) do
     update_change(changeset, :first_name, &String.trim/1)
     update_change(changeset, :last_name, &String.trim/1)
