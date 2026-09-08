@@ -301,4 +301,8 @@ defmodule BetPeak.Accounts do
       end
     end)
   end
+
+  def delete_user(user) do
+    Repo.delete(user)
+  end
 end

@@ -13,7 +13,8 @@ defmodule BetPeakWeb.AdminLive.Users do
      |> assign(users: users)
      |> assign(selected_user: nil)
      |> assign(show_user_modal: false)
-     |> assign(modal_operation: "account_update")
+     |> assign(modal_operation: "account_info")
+     |> assign(changeset: %{})
      |> assign(form: nil)}
   end
 
@@ -32,7 +33,10 @@ defmodule BetPeakWeb.AdminLive.Users do
 
   @impl true
   def handle_event("close_user_modal", _params, socket) do
-    {:noreply, assign(socket, :show_user_modal, false)}
+    {:noreply,
+     socket
+     |> assign(show_user_modal: false)
+     |> assign(modal_operation: "account_info")}
   end
 
   @impl true
@@ -56,9 +60,11 @@ defmodule BetPeakWeb.AdminLive.Users do
       {:ok, user} ->
         {:noreply,
          socket
+         |> assign_form(Accounts.change_user_access(user))
+         |> assign(show_user_modal: false)
+         |> assign(modal_operation: "account_info")
          |> assign(users: Accounts.get_all_users())
          |> assign(selected_user: user)
-         |> assign_form(Accounts.change_user_access(user))
          |> put_flash(:info, "User access updated successfully.")}
 
       {:error, changeset} ->
@@ -68,6 +74,24 @@ defmodule BetPeakWeb.AdminLive.Users do
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, form: to_form(changeset, as: :user))
+  end
+
+  @impl true
+  def handle_event("delete_user", _params, socket) do
+    case Accounts.delete_user(socket.assigns.selected_user) do
+      {:ok, _user} ->
+        {:noreply,
+         socket
+         |> assign(users: Accounts.get_all_users())
+         |> put_flash(:info, "Successfully deleted the user")
+         |> assign(show_user_modal: false)}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Oops! Something went wrong while deleting the user.")
+         |> assign(show_user_modal: false)}
+    end
   end
 
   attr :selected_user, :any, required: true
@@ -197,32 +221,89 @@ defmodule BetPeakWeb.AdminLive.Users do
               class="space-y-6"
             >
               <div class="grid gap-6 sm:grid-cols-2">
-                <.radio_group
-                  field={@form[:role]}
-                  label="Select role"
-                  disabled={can_elevate_user(@current_scope, @selected_user)}
-                  options={[
-                    {"Admin", "admin"},
-                    {"User", "user"}
-                  ]}
-                />
+                <%!-- disabled={can_elevate_user(@current_scope, @selected_user)} --%>
+                <fieldset
+                  id="user-role-group"
+                  class="fieldset mb-2 w-full"
+                  aria-labelledby="user-role-label"
+                >
+                  <span id="user-role-label" class="label mb-1">Select Role</span>
+                  <div class="grid grid-cols-2 gap-1 rounded-2xl border border-[#d7d2c7] bg-white p-1 transition focus-within:border-[#b28708] focus-within:ring-2 focus-within:ring-[#f4bf25]/20">
+                    <label
+                      for="user-role-admin"
+                      class="flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-[#161616]/60 transition hover:bg-[#f6f4ee] has-[:checked]:bg-[#161616] has-[:checked]:text-white"
+                    >
+                      <input
+                        id="user-role-admin"
+                        type="radio"
+                        name={@form[:role].name}
+                        value="admin"
+                        checked={to_string(@form[:role].value) == "admin"}
+                        class="radio radio-xs border-current text-[#f4bf25] checked:border-[#f4bf25] checked:bg-[#f4bf25]"
+                      /> Admin
+                    </label>
 
-                <.radio_group
-                  field={@form[:is_superuser]}
-                  label="Is super user"
-                  disabled={can_elevate_user(@current_scope, @selected_user)}
-                  options={[
-                    {"True", true},
-                    {"False", false}
-                  ]}
-                />
+                    <label
+                      for="user-role-user"
+                      class="flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-[#161616]/60 transition hover:bg-[#f6f4ee] has-[:checked]:bg-[#161616] has-[:checked]:text-white"
+                    >
+                      <input
+                        id="user-role-user"
+                        type="radio"
+                        name={@form[:role].name}
+                        value="user"
+                        checked={to_string(@form[:role].value) == "user"}
+                        class="radio radio-xs border-current text-[#f4bf25] checked:border-[#f4bf25] checked:bg-[#f4bf25]"
+                      /> User
+                    </label>
+                  </div>
+                </fieldset>
+
+                <%!-- disabled={can_elevate_user(@current_scope, @selected_user)} --%>
+                <fieldset
+                  id="user-superuser-group"
+                  class="fieldset mb-2 w-full"
+                  aria-labelledby="user-superuser-label"
+                >
+                  <span id="user-superuser-label" class="label mb-1">Is Super User</span>
+                  <div class="grid grid-cols-2 gap-1 rounded-2xl border border-[#d7d2c7] bg-white p-1 transition focus-within:border-[#b28708] focus-within:ring-2 focus-within:ring-[#f4bf25]/20">
+                    <label
+                      for="user-superuser-true"
+                      class="flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-[#161616]/60 transition hover:bg-[#f6f4ee] has-[:checked]:bg-[#161616] has-[:checked]:text-white"
+                    >
+                      <input
+                        id="user-superuser-true"
+                        type="radio"
+                        name={@form[:is_superuser].name}
+                        value="true"
+                        checked={to_string(@form[:is_superuser].value) == "true"}
+                        class="radio radio-xs border-current text-[#f4bf25] checked:border-[#f4bf25] checked:bg-[#f4bf25]"
+                      /> True
+                    </label>
+
+                    <label
+                      for="user-superuser-false"
+                      class="flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-[#161616]/60 transition hover:bg-[#f6f4ee] has-[:checked]:bg-[#161616] has-[:checked]:text-white"
+                    >
+                      <input
+                        id="user-superuser-false"
+                        type="radio"
+                        name={@form[:is_superuser].name}
+                        value="false"
+                        checked={to_string(@form[:is_superuser].value) == "false"}
+                        class="radio radio-xs border-current text-[#f4bf25] checked:border-[#f4bf25] checked:bg-[#f4bf25]"
+                      /> False
+                    </label>
+                  </div>
+                  <.error :for={{msg, _opts} <- @form[:is_superuser].errors}>{msg}</.error>
+                </fieldset>
               </div>
 
               <div class="flex justify-end border-t border-[#ded9ce] pt-5">
+                <%!-- disabled={can_elevate_user(@current_scope, @selected_user)} --%>
                 <.button
                   phx-disable-with="Saving access ..."
                   class="group rounded-2xl flex h-11 items-center justify-center gap-2 bg-[#161616] px-6 text-sm font-bold text-white transition hover:bg-[#735700] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b28708]"
-                  disabled={can_elevate_user(@current_scope, @selected_user)}
                 >
                   Save access
                   <.icon
@@ -251,6 +332,7 @@ defmodule BetPeakWeb.AdminLive.Users do
                 phx-disable-with="Deleting account..."
                 class="mt-5 rounded-2xl flex h-11 items-center justify-center gap-2 bg-red-600 px-6 text-sm font-bold text-white transition hover:bg-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
                 disabled={if(@current_scope.user.id == @selected_user.id, do: true, else: false)}
+                phx-click="delete_user"
               >
                 <.icon name="hero-trash" class="size-4" /> Delete user
               </.button>
