@@ -18,7 +18,7 @@ defmodule BetPeak.Teams.Team do
     |> cast(attrs, [:name, :short_form, :about, :user_id, :sport_id])
     |> validate_required([:name, :short_form, :about, :user_id, :sport_id])
     |> validate_length(:name, min: 2)
-    |> validate_length(:short_form, min: 2, max: 5)
+    |> validate_length(:short_form, min: 2, max: 15)
     |> validate_length(:about, min: 10)
     |> unique_constraint(:short_form)
     |> unique_constraint(:name)
