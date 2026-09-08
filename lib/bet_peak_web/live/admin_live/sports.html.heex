@@ -13,17 +13,19 @@
           View all sports, update, and delete them.
         </p>
       </div>
-      <div class="flex h-10 rounded-2xl items-center gap-2 border border-[#d8d3c8] bg-white px-4 text-sm font-semibold text-[#161616]/65">
-        <.icon name="hero-play" class="size-4 text-[#947000]" /> {length(@sports)} Created
+      <div class="flex flex-wrap items-center gap-3 sm:ml-auto sm:justify-end">
+        <div class="flex h-10 items-center gap-2 rounded-2xl border border-[#d8d3c8] bg-white px-4 text-sm font-semibold text-[#161616]/65">
+          <.icon name="hero-play" class="size-4 text-[#947000]" /> {length(@sports)} Created
+        </div>
+        <.button
+          class="btn btn-primary h-10 items-center gap-2 rounded-2xl px-4 text-sm font-semibold text-white"
+          phx-click="open_sport_modal"
+          phx-value-operation="add"
+          phx-value-sport_id=""
+        >
+          <.icon name="hero-plus" class="size-4 text-white" /> Add Sport
+        </.button>
       </div>
-      <.button
-        class="btn btn-primary rounded-2xl h-10 rounded-2xl items-center gap-2 px-4 text-sm font-semibold text-white"
-        phx-click="open_sport_modal"
-        phx-value-operation="add"
-        phx-value-sport_id=""
-      >
-        <.icon name="hero-plus" class="size-4 text-white" /> Add Sport
-      </.button>
     </header>
     <div class="overflow-hidden rounded-2xl border border-[#d8d3c8] bg-white shadow-[0_12px_40px_rgba(22,22,22,0.06)]">
       <div class="overflow-x-auto">

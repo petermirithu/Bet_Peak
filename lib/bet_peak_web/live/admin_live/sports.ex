@@ -12,7 +12,7 @@ defmodule BetPeakWeb.AdminLive.Sports do
      |> assign(sports: Sports.fetch_all())
      |> assign(show_sport_modal: false)
      |> assign(modal_operation: "")
-     |> assign(selected_sport: %{name: "", id: 0})
+     |> assign(selected_sport: %{})
      |> assign(form: nil)}
   end
 
@@ -65,8 +65,9 @@ defmodule BetPeakWeb.AdminLive.Sports do
     {
       :noreply,
       socket
-      |> assign(selected_sport: %{name: "", id: 0})
       |> assign(show_sport_modal: false)
+      |> assign(modal_operation: "")
+      |> assign(selected_sport: %{})
     }
   end
 
@@ -111,7 +112,7 @@ defmodule BetPeakWeb.AdminLive.Sports do
         {:noreply,
          socket
          |> assign(sports: Sports.fetch_all())
-         |> put_flash(:info, "Successfully delete the sport")
+         |> put_flash(:info, "Successfully deleted the sport")
          |> assign(show_sport_modal: false)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -125,7 +126,15 @@ defmodule BetPeakWeb.AdminLive.Sports do
   @impl true
   def handle_event("validate_sport_form", %{"sport" => sport_params}, socket) do
     new_sport_params = Map.put(sport_params, "user_id", socket.assigns.current_scope.user.id)
-    changeset = Sports.change_sport_creation(%Sport{}, new_sport_params, validate_unique: false)
+
+    sport =
+      if socket.assigns.modal_operation == "edit" do
+        socket.assigns.selected_sport
+      else
+        %Sport{}
+      end
+
+    changeset = Sports.change_sport_creation(sport, new_sport_params, validate_unique: false)
     {:noreply, assign_form(socket, Map.put(changeset, :action, :validate))}
   end
 
@@ -160,10 +169,10 @@ defmodule BetPeakWeb.AdminLive.Sports do
             <div class="min-w-0 pr-10">
               <div class="flex flex-wrap items-center gap-2">
                 <h2 id="sport-modal-title" class="truncate text-xl font-extrabold">
-                  {if(@modal_operation == "add",
-                    do: "Add New Sport",
-                    else: "Sport: #{@selected_sport.name}"
-                  )}
+                  <span :if={@modal_operation == "add"}>Add New Sport</span>
+                  <span :if={@modal_operation == "edit" or @modal_operation == "delete"}>
+                    {"Sport: #{@selected_sport.name}"}
+                  </span>
                 </h2>
               </div>
             </div>
@@ -213,18 +222,41 @@ defmodule BetPeakWeb.AdminLive.Sports do
                 />
               </div>
 
-              <div>
-                <.radio_group
-                  field={@form[:active]}
-                  label="Is Active"
-                  disabled={false}
-                  class="text-[#161616] outline-none transition placeholder:text-[#161616]/30 focus:border-[#b28708] focus:ring-2 focus:ring-[#f4bf25]/20"
-                  options={[
-                    {"True", true},
-                    {"False", false}
-                  ]}
-                />
-              </div>
+              <fieldset
+                id="sport-active-group"
+                class="fieldset mb-2 w-full"
+                aria-labelledby="sport-active-label"
+              >
+                <span id="sport-active-label" class="label mb-1">Is Active</span>
+                <div class="grid grid-cols-2 gap-1 rounded-2xl border border-[#d7d2c7] bg-white p-1 transition focus-within:border-[#b28708] focus-within:ring-2 focus-within:ring-[#f4bf25]/20">
+                  <label
+                    for="sport-active-true"
+                    class="flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-[#161616]/60 transition hover:bg-[#f6f4ee] has-[:checked]:bg-[#161616] has-[:checked]:text-white"
+                  >
+                    <input
+                      id="sport-active-true"
+                      type="radio"
+                      name={@form[:active].name}
+                      value="true"
+                      checked={to_string(@form[:active].value) == "true"}
+                      class="radio radio-xs border-current text-[#f4bf25] checked:border-[#f4bf25] checked:bg-[#f4bf25]"
+                    /> True
+                  </label>
+                  <label
+                    for="sport-active-false"
+                    class="flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-[#161616]/60 transition hover:bg-[#f6f4ee] has-[:checked]:bg-[#161616] has-[:checked]:text-white"
+                  >
+                    <input
+                      id="sport-active-false"
+                      type="radio"
+                      name={@form[:active].name}
+                      value="false"
+                      checked={to_string(@form[:active].value) == "false"}
+                      class="radio radio-xs border-current text-[#f4bf25] checked:border-[#f4bf25] checked:bg-[#f4bf25]"
+                    /> False
+                  </label>
+                </div>
+              </fieldset>
 
               <div class="flex justify-end border-t border-[#ded9ce] pt-5">
                 <.button
@@ -259,7 +291,6 @@ defmodule BetPeakWeb.AdminLive.Sports do
                 phx-disable-with="Deleting sport..."
                 class="mt-5 rounded-2xl flex h-11 items-center justify-center gap-2 bg-red-600 px-6 text-sm font-bold text-white transition hover:bg-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
                 phx-click="delete_sport"
-                phx-value-sport_id={@selected_sport.id}
               >
                 <.icon name="hero-trash" class="size-4" /> Delete sport
               </.button>
