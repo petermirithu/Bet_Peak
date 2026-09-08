@@ -203,6 +203,14 @@ defmodule BetPeakWeb.Layouts do
                     <.icon name="hero-user-group" class="size-5 text-[#f4bf25]" /> Teams
                   </.link>
                 </li>
+                <li>
+                  <.link
+                    navigate={~p"/admin/games"}
+                    class="flex h-11 items-center gap-3 px-3 text-sm font-semibold text-white/70 transition hover:bg-white/8 hover:text-white"
+                  >
+                    <.icon name="hero-trophy" class="size-5 text-[#f4bf25]" /> Games
+                  </.link>
+                </li>
               </ul>
             <% end %>
           </nav>

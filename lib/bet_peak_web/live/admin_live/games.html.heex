@@ -1,0 +1,112 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <section
+    id="admin-games-page"
+    class="mx-auto w-full max-w-[96rem] px-4 py-6 sm:px-6 lg:px-8 lg:py-10"
+  >
+    <header class="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p class="mb-2 text-xs font-bold text-[#947000]">
+          Administration
+        </p>
+        <h1 class="text-3xl font-extrabold text-[#161616]">Games</h1>
+        <p class="mt-2 text-sm text-[#161616]/55">
+          View all games, update, and delete them.
+        </p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3 sm:ml-auto sm:justify-end">
+        <div class="flex h-10 rounded-2xl items-center gap-2 border border-[#d8d3c8] bg-white px-4 text-sm font-semibold text-[#161616]/65">
+          <.icon name="hero-trophy" class="size-4 text-[#947000]" /> {length(@games)} Created
+        </div>
+        <.button
+          class="btn btn-primary rounded-2xl h-10 rounded-2xl items-center gap-2 px-4 text-sm font-semibold text-white"
+          phx-click="open_game_modal"
+          phx-value-operation="add"
+          phx-value-game_id=""
+        >
+          <.icon name="hero-plus" class="size-4 text-white" /> Add Game
+        </.button>
+      </div>
+    </header>
+    <div class="overflow-hidden rounded-2xl border border-[#d8d3c8] bg-white shadow-[0_12px_40px_rgba(22,22,22,0.06)]">
+      <div class="overflow-x-auto">
+        <table id="games-table" class="table">
+          <thead class="bg-[#161616] text-[0.65rem] text-white/60">
+            <tr>
+              <th class="w-12 text-center">#</th>
+              <th>Match</th>
+              <th>Starts at</th>
+              <th>Status</th>
+              <th>Home Odds</th>
+              <th>Draw Odds</th>
+              <th>Away Odds</th>
+              <th>Result</th>
+              <th>Created</th>
+              <th><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#ece8de]">
+            <tr
+              :for={{game, index} <- Enum.with_index(@games)}
+              id={"game-row-#{game.id}"}
+              class="group cursor-pointer transition-colors hover:bg-[#faf7ed]"
+            >
+              <td class="text-center text-xs font-semibold text-[#161616]/35">{index + 1}</td>
+              <td class="whitespace-nowrap">
+                <p class="font-bold text-[#161616]">
+                  {game.home_team.short_form} VS {game.away_team.short_form}
+                </p>
+              </td>
+              <td class="text-sm text-[#161616]/65">{Helpers.format_date(game.starts_at)}</td>
+              <td class="whitespace-nowrap text-sm text-[#161616]/65">{game.status}</td>
+              <td class="whitespace-nowrap text-sm text-[#161616]/65">{game.home_odds}</td>
+              <td class="whitespace-nowrap text-sm text-[#161616]/65">{game.draw_odds}</td>
+              <td class="whitespace-nowrap text-sm text-[#161616]/65">{game.away_odds}</td>
+              <td class="whitespace-nowrap text-sm text-[#161616]/65">{game.result}</td>
+              <td class="whitespace-nowrap text-xs text-[#161616]/50">
+                {Helpers.format_date(game.inserted_at)}
+              </td>
+              <td>
+                <.button
+                  class="btn btn-circle btn-secondary transition-transform group-hover:translate-y-1 mr-2"
+                  phx-click="open_game_modal"
+                  phx-value-operation="edit"
+                  phx-value-game_id={game.id}
+                >
+                  <.icon
+                    name="hero-pencil"
+                    class="size-4 text-primary"
+                  />
+                </.button>
+                <.button
+                  class="btn btn-circle btn-error transition-transform group-hover:translate-y-1"
+                  phx-click="open_game_modal"
+                  phx-value-operation="delete"
+                  phx-value-game_id={game.id}
+                >
+                  <.icon
+                    name="hero-trash"
+                    class="size-4 text-white"
+                  />
+                </.button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div :if={@games == []} class="grid min-h-64 place-items-center px-6 text-center">
+        <div>
+          <.icon name="hero-trophy" class="mx-auto mb-3 size-8 text-[#161616]/25" />
+          <p class="font-semibold text-[#161616]">No games found</p>
+        </div>
+      </div>
+
+      <.game_modal
+        show_game_modal={@show_game_modal}
+        modal_operation={@modal_operation}
+        selected_game={@selected_game}
+        teams={@teams}
+        form={@form}
+      />
+    </div>
+  </section>
+</Layouts.app>
