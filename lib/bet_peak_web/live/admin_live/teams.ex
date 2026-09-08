@@ -12,8 +12,6 @@ defmodule BetPeakWeb.AdminLive.Teams do
       Sports.fetch_all()
       |> Enum.map(&{String.to_atom("#{&1.name}"), &1.id})
 
-    IO.inspect(Teams.fetch_all())
-
     {
       :ok,
       socket
@@ -21,7 +19,7 @@ defmodule BetPeakWeb.AdminLive.Teams do
       |> assign(teams: Teams.fetch_all())
       |> assign(show_team_modal: false)
       |> assign(modal_operation: "")
-      |> assign(selected_team: %{name: "", id: 0})
+      |> assign(selected_team: %{})
       |> assign(form: nil)
     }
   end
@@ -75,8 +73,9 @@ defmodule BetPeakWeb.AdminLive.Teams do
     {
       :noreply,
       socket
-      |> assign(selected_team: %{name: "", id: 0})
       |> assign(show_team_modal: false)
+      |> assign(modal_operation: "")
+      |> assign(selected_team: %{})
     }
   end
 
@@ -170,10 +169,10 @@ defmodule BetPeakWeb.AdminLive.Teams do
             <div class="min-w-0 pr-10">
               <div class="flex flex-wrap items-center gap-2">
                 <h2 id="team-modal-title" class="truncate text-xl font-extrabold">
-                  {if(@modal_operation == "add",
-                    do: "Add New Team",
-                    else: "Team: #{@selected_team.name}"
-                  )}
+                  <span :if={@modal_operation == "add"}>Add New Team</span>
+                  <span :if={@modal_operation == "edit" or @modal_operation == "delete"}>
+                    {"Team: #{@selected_team.name}"}
+                  </span>
                 </h2>
               </div>
             </div>

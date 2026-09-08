@@ -1,8 +1,4 @@
 defmodule BetPeak.Teams do
-  @moduledoc """
-  The Teams context.
-  """
-
   import Ecto.Query, warn: false
   alias BetPeak.Repo
 
