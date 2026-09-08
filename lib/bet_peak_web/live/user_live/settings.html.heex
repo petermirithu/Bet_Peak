@@ -1,0 +1,133 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <section
+    id="account-settings-page"
+    class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10"
+  >
+    <header class="mb-8 border-b border-[#d8d3c8] pb-7">
+      <p class="mb-2 text-xs font-bold text-[#947000]">
+        Personal account
+      </p>
+      <h1 class="text-3xl font-extrabold text-[#161616] sm:text-4xl">
+        Account settings
+      </h1>
+      <p class="mt-2 max-w-2xl text-sm leading-6 text-[#161616]/55">
+        Keep your sign-in details current and protect access to your Bet Peak account.
+      </p>
+    </header>
+
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <section
+        aria-labelledby="email-settings-title"
+        class="border rounded-2xl border-[#d8d3c8] bg-white shadow-[0_8px_28px_rgba(22,22,22,0.04)]"
+      >
+        <header class="flex items-start gap-4 border-b border-[#ece8de] p-5 sm:p-6">
+          <div class="grid rounded-2xl size-10 shrink-0 place-items-center bg-[#fff3c6] text-[#947000]">
+            <.icon name="hero-envelope" class="size-5" />
+          </div>
+          <div>
+            <h2 id="email-settings-title" class="font-extrabold text-[#161616]">Email address</h2>
+            <p class="mt-1 text-sm leading-5 text-[#161616]/50">
+              We will send a confirmation link to your new address.
+            </p>
+          </div>
+        </header>
+
+        <.form
+          for={@email_form}
+          id="email_form"
+          phx-submit="update_email"
+          phx-change="validate_email"
+          class="p-5 sm:p-6"
+        >
+          <.input
+            field={@email_form[:email]}
+            type="email"
+            label="New email address"
+            autocomplete="email"
+            placeholder="you@example.com"
+            spellcheck="false"
+            required
+            class="h-12 w-full rounded-2xl border border-[#d7d2c7] bg-white px-4 text-[#161616] outline-none transition placeholder:text-[#161616]/30 focus:border-[#b28708] focus:ring-2 focus:ring-[#f4bf25]/20"
+            error_class="border-red-500 focus:border-red-500 focus:ring-red-500/15"
+          />
+
+          <div class="mt-5 flex items-center justify-between gap-4 border-t border-[#ece8de] pt-5">
+            <.button
+              phx-disable-with="Changing..."
+              class="flex h-11 rounded-2xl items-center justify-center gap-2 bg-[#161616] px-5 text-sm font-bold text-white transition hover:bg-[#735700] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b28708]"
+            >
+              Change Email <.icon name="hero-arrow-right" class="size-4" />
+            </.button>
+          </div>
+        </.form>
+      </section>
+
+      <section
+        aria-labelledby="password-settings-title"
+        class="border rounded-2xl border-[#d8d3c8] bg-white shadow-[0_8px_28px_rgba(22,22,22,0.04)]"
+      >
+        <header class="flex items-start gap-4 border-b border-[#ece8de] p-5 sm:p-6">
+          <div class="grid rounded-2xl size-10 shrink-0 place-items-center bg-[#161616] text-[#f4bf25]">
+            <.icon name="hero-lock-closed" class="size-5" />
+          </div>
+          <div>
+            <h2 id="password-settings-title" class="font-extrabold text-[#161616]">Password</h2>
+            <p class="mt-1 text-sm leading-5 text-[#161616]/50">
+              Choose a strong password you do not use elsewhere.
+            </p>
+          </div>
+        </header>
+
+        <.form
+          for={@password_form}
+          id="password_form"
+          action={~p"/users/update-password"}
+          method="post"
+          phx-change="validate_password"
+          phx-submit="update_password"
+          phx-trigger-action={@trigger_submit}
+          class="p-5 sm:p-6"
+        >
+          <input
+            name={@password_form[:email].name}
+            type="hidden"
+            id="hidden_user_email"
+            spellcheck="false"
+            value={@current_email}
+          />
+          <.input
+            field={@password_form[:password]}
+            type="password"
+            label="New password"
+            autocomplete="new-password"
+            placeholder="Enter a secure password"
+            spellcheck="false"
+            required
+            class="h-12 rounded-2xl w-full border border-[#d7d2c7] bg-white px-4 text-[#161616] outline-none transition placeholder:text-[#161616]/30 focus:border-[#b28708] focus:ring-2 focus:ring-[#f4bf25]/20"
+            error_class="border-red-500 focus:border-red-500 focus:ring-red-500/15"
+          />
+          <.input
+            field={@password_form[:password_confirmation]}
+            type="password"
+            label="Confirm new password"
+            autocomplete="new-password"
+            placeholder="Repeat your password"
+            spellcheck="false"
+            required
+            class="h-12 w-full rounded-2xl border border-[#d7d2c7] bg-white px-4 text-[#161616] outline-none transition placeholder:text-[#161616]/30 focus:border-[#b28708] focus:ring-2 focus:ring-[#f4bf25]/20"
+            error_class="border-red-500 focus:border-red-500 focus:ring-red-500/15"
+          />
+
+          <div class="mt-5 flex items-center justify-between gap-4 border-t border-[#ece8de] pt-5">
+            <.button
+              phx-disable-with="Saving..."
+              class="flex h-11 rounded-2xl items-center justify-center gap-2 bg-[#161616] px-5 text-sm font-bold text-white transition hover:bg-[#735700] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b28708]"
+            >
+              Save Password <.icon name="hero-check" class="size-4" />
+            </.button>
+          </div>
+        </.form>
+      </section>
+    </div>
+  </section>
+</Layouts.app>

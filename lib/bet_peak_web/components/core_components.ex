@@ -116,7 +116,7 @@ defmodule BetPeakWeb.CoreComponents do
       """
     else
       ~H"""
-      <button class={@class} {@rest}>
+      <button class={[@class, "cursor-pointer"]} {@rest}>
         {render_slot(@inner_block)}
       </button>
       """
@@ -303,7 +303,7 @@ defmodule BetPeakWeb.CoreComponents do
   end
 
   # Helper used by inputs to generate form errors
-  defp error(assigns) do
+  def error(assigns) do
     ~H"""
     <p class="mt-1.5 flex gap-2 items-center text-sm text-error">
       <.icon name="hero-exclamation-circle" class="size-5" />

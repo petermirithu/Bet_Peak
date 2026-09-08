@@ -14,6 +14,10 @@ defmodule BetPeak.Accounts.User do
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
 
+    has_many :sports, BetPeak.Sports.Sport
+    has_many :teams, BetPeak.Teams.Team
+    has_many :games, BetPeak.Games.Game
+
     timestamps(type: :utc_datetime)
   end
 
@@ -29,6 +33,24 @@ defmodule BetPeak.Accounts.User do
     |> unique_constraint(:email)
     |> unique_constraint(:msisdn)
     |> validate_password(opts)
+  end
+
+  def access_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:role, :is_superuser])
+    |> validate_required([:role, :is_superuser])
+    |> validate_is_superuser()
+  end
+
+  defp validate_is_superuser(changeset) do
+    role = get_field(changeset, :role)
+    is_superuser = get_field(changeset, :is_superuser)
+
+    if role && is_superuser && role == :user && is_superuser == true do
+      add_error(changeset, :is_superuser, "A normal user can not be a super user!")
+    else
+      changeset
+    end
   end
 
   defp format_first_last_name(changeset) do
