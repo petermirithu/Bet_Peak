@@ -52,6 +52,7 @@ defmodule BetPeak.Games.Game do
     |> validate_number(:home_odds, greater_than: Decimal.new("1.0"))
     |> validate_number(:away_odds, greater_than: Decimal.new("1.0"))
     |> validate_number(:draw_odds, greater_than: Decimal.new("1.0"))
+    |> validate_status_result()
   end
 
   defp validate_starts_at_in_future(changeset) do
@@ -73,6 +74,19 @@ defmodule BetPeak.Games.Game do
       add_error(changeset, :away_team_id, "Home team and away team cannot be the same team.")
     else
       changeset
+    end
+  end
+
+  defp validate_status_result(changeset) do
+    status = get_field(changeset, :status)
+    result = Map.get(changeset.changes, :result, Map.get(changeset.data, :result, :pending))
+
+    case {status, result} do
+      {:finished, :pending} ->
+        add_error(changeset, :status, "Game can't be finished and result is Pending")
+
+      _ ->
+        changeset
     end
   end
 end

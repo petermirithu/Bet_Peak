@@ -11,6 +11,6 @@ defmodule BetPeakWeb.Helpers do
     end
   end
 
-  def format_date(%DateTime{} = date), do: Calendar.strftime(date, "%d %b %Y")
-  def format_date(%NaiveDateTime{} = date), do: Calendar.strftime(date, "%d %b %Y")
+  def format_date(%DateTime{} = date), do: Calendar.strftime(date, "%d %b %Y %H:%M")
+  def format_date(%NaiveDateTime{} = date), do: Calendar.strftime(date, "%d %b %Y %H:%M")
 end

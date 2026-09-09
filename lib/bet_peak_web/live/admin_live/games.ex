@@ -254,7 +254,7 @@ defmodule BetPeakWeb.AdminLive.Games do
                   />
                 </div>
               </div>
-              <div>
+              <div class={if(@modal_operation == "edit", do: "", else: "sm:col-span-2")}>
                 <.input
                   field={@form[:starts_at]}
                   type="datetime-local"
@@ -265,25 +265,7 @@ defmodule BetPeakWeb.AdminLive.Games do
                   error_class="border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15"
                 />
               </div>
-              <div>
-                <.input
-                  field={@form[:status]}
-                  type="select"
-                  label="Select Game Status"
-                  options={[
-                    Scheduled: "scheduled",
-                    Live: "live",
-                    Finished: "finished",
-                    Cancelled: "cancelled"
-                  ]}
-                  spellcheck="false"
-                  required
-                  class="h-12 select rounded-2xl w-full border border-[#d7d2c7] bg-white px-4 text-[#161616] outline-none transition placeholder:text-[#161616]/30 focus:border-[#b28708] focus:ring-2 focus:ring-[#f4bf25]/20"
-                  error_class="border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15"
-                />
-              </div>
-
-              <div :if={@modal_operation == "edit"} class="sm:col-span-2">
+              <div :if={@modal_operation == "edit"}>
                 <.input
                   field={@form[:result]}
                   type="select"
@@ -296,6 +278,24 @@ defmodule BetPeakWeb.AdminLive.Games do
                   ]}
                   spellcheck="false"
                   required="false"
+                  class="h-12 select rounded-2xl w-full border border-[#d7d2c7] bg-white px-4 text-[#161616] outline-none transition placeholder:text-[#161616]/30 focus:border-[#b28708] focus:ring-2 focus:ring-[#f4bf25]/20"
+                  error_class="border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15"
+                />
+              </div>
+
+              <div :if={@modal_operation == "edit"} class="sm:col-span-2">
+                <.input
+                  field={@form[:status]}
+                  type="select"
+                  label="Select Game Status"
+                  options={[
+                    Scheduled: "scheduled",
+                    Live: "live",
+                    Finished: "finished",
+                    Cancelled: "cancelled"
+                  ]}
+                  spellcheck="false"
+                  required
                   class="h-12 select rounded-2xl w-full border border-[#d7d2c7] bg-white px-4 text-[#161616] outline-none transition placeholder:text-[#161616]/30 focus:border-[#b28708] focus:ring-2 focus:ring-[#f4bf25]/20"
                   error_class="border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15"
                 />

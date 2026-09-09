@@ -8,20 +8,40 @@
         <p class="mb-2 text-xs font-bold text-[#947000]">
           Bet Peak Sportsbook
         </p>
-        <h1 class="text-3xl font-extrabold text-[#161616]">Bets</h1>
+        <h1 class="text-3xl font-extrabold text-[#161616]">
+          {if(@live_action == :bets_placed, do: "Bets Placed", else: "Bets History")}
+        </h1>
         <p class="mt-2 text-sm text-[#161616]/55">
-          View all bets, update, and delete them.
+          {if(@live_action == :bets_placed,
+            do: "View all bets placed, update, and cancel them.",
+            else: "View all bets you have placed before and how much you got."
+          )}
         </p>
       </div>
       <div class="flex flex-wrap items-center gap-3 sm:ml-auto sm:justify-end">
         <div class="flex h-10 rounded-2xl items-center gap-2 border border-[#d8d3c8] bg-white px-4 text-sm font-semibold text-[#161616]/65">
-          <.icon name="hero-ticket" class="size-4 text-[#947000]" /> {length(@bets)} Created
+          <.icon name="hero-ticket" class="size-4 text-[#947000]" />
+          {length(@bets)} Bets
+        </div>
+
+        <div
+          :if={@live_action == :bets_history}
+          class="flex h-10 rounded-2xl items-center gap-2 border border-[#d8d3c8] bg-white px-4 text-sm font-semibold text-[#161616]/65"
+        >
+          <.icon name="hero-arrow-trending-up" class="size-4 text-green-600" /> Wins: KES {@won}
+        </div>
+
+        <div
+          :if={@live_action == :bets_history}
+          class="flex h-10 rounded-2xl items-center gap-2 border border-[#d8d3c8] bg-white px-4 text-sm font-semibold text-[#161616]/65"
+        >
+          <.icon name="hero-arrow-trending-down" class="size-4 text-red-600" />
+          Losses: KES {@lost}
         </div>
         <.button
+          :if={@live_action == :bets_placed}
           class="btn btn-primary rounded-2xl h-10 rounded-2xl items-center gap-2 px-4 text-sm font-semibold text-white"
-          phx-click="open_bet_modal"
-          phx-value-operation="add"
-          phx-value-bet_id=""
+          phx-click="go_to_home_to_place_bet"
         >
           <.icon name="hero-plus" class="size-4 text-white" /> Place Bet
         </.button>
@@ -40,7 +60,8 @@
               <th>Potential Payout</th>
               <th>Status</th>
               <th>Place At</th>
-              <th><span class="sr-only">Actions</span></th>
+              <th :if={@live_action == :bets_history}>Matured At</th>
+              <th :if={@live_action == :bets_placed}><span class="sr-only">Actions</span></th>
             </tr>
           </thead>
           <tbody class="divide-y divide-[#ece8de]">
@@ -57,14 +78,22 @@
                 </p>
               </td>
               <td class="text-sm text-[#161616]/65">{bet.selection}</td>
-              <td class="whitespace-nowrap text-sm text-[#161616]/65">{bet.stake_amount}</td>
+              <td class="whitespace-nowrap text-sm text-[#161616]/65">KES {bet.stake_amount}</td>
               <td class="whitespace-nowrap text-sm text-[#161616]/65">{bet.odds_at_placement}</td>
-              <td class="whitespace-nowrap text-sm text-[#161616]/65">{bet.potential_payout}</td>
+              <td class="whitespace-nowrap text-sm text-[#161616]/65">
+                KES {bet.potential_payout}
+              </td>
               <td class="whitespace-nowrap text-sm text-[#161616]/65">{bet.status}</td>
               <td class="whitespace-nowrap text-xs text-[#161616]/50">
                 {Helpers.format_date(bet.inserted_at)}
               </td>
-              <td>
+              <td
+                :if={@live_action == :bets_history}
+                class="whitespace-nowrap text-xs text-[#161616]/50"
+              >
+                {Helpers.format_date(bet.updated_at)}
+              </td>
+              <td :if={@live_action == :bets_placed}>
                 <.button
                   class="btn btn-circle btn-secondary transition-transform group-hover:translate-y-1 mr-2"
                   phx-click="open_bet_modal"

@@ -64,7 +64,8 @@ defmodule BetPeakWeb.Router do
         {BetPeakWeb.UserAuth, :mount_current_scope}
       ] do
       live "/", BetLive.Index, :home
-      live "/bets", BetLive.Index, :bets
+      live "/bets-placed", BetLive.Index, :bets_placed
+      live "/bets-history", BetLive.Index, :bets_history
 
       live "/users/settings", UserLive.Settings, :edit
       live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email

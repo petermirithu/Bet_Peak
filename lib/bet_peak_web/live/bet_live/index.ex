@@ -12,8 +12,8 @@ defmodule BetPeakWeb.BetLive.Index do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(games: Games.fetch_all())
-     |> assign(bets: Bets.fetch_all())
+     |> assign(games: Games.fetch_active())
+     |> handle_bets_loading()
      |> assign(show_bet_modal: false)
      |> assign(modal_operation: "")
      |> assign(selected_game: %{})
@@ -32,7 +32,26 @@ defmodule BetPeakWeb.BetLive.Index do
   def render(assigns) do
     case assigns.live_action do
       :home -> home_html(assigns)
-      :bets -> bets_html(assigns)
+      :bets_placed -> bets_html(assigns)
+      :bets_history -> bets_html(assigns)
+    end
+  end
+
+  defp handle_bets_loading(socket) do
+    case socket.assigns.live_action do
+      :bets_placed ->
+        assign(socket, bets: Bets.fetch_active(socket.assigns.current_scope.user.id))
+
+      :bets_history ->
+        history = Bets.fetch_history(socket.assigns.current_scope.user.id)
+
+        socket
+        |> assign(bets: history.bets)
+        |> assign(won: history.won)
+        |> assign(lost: history.lost)
+
+      :home ->
+        socket
     end
   end
 
@@ -42,8 +61,6 @@ defmodule BetPeakWeb.BetLive.Index do
     game = Enum.find(socket.assigns.games, &(&1.id == String.to_integer(game_id)))
 
     changeset = Bets.change_bet_creation(%Bet{}, %{}, validate_unique: false)
-
-    # IO.inspect(changeset)
 
     {
       :noreply,
@@ -123,7 +140,7 @@ defmodule BetPeakWeb.BetLive.Index do
       {:ok, _bet} ->
         {:noreply,
          socket
-         |> assign(bets: Bets.fetch_all())
+         |> handle_bets_loading()
          |> put_flash(:info, "Successfully updated the bet")
          |> assign(show_bet_modal: false)}
 
@@ -138,7 +155,7 @@ defmodule BetPeakWeb.BetLive.Index do
       {:ok, _bet} ->
         {:noreply,
          socket
-         |> assign(bets: Bets.fetch_all())
+         |> handle_bets_loading()
          |> put_flash(:info, "Successfully deleted the bet")
          |> assign(show_bet_modal: false)}
 
@@ -209,6 +226,13 @@ defmodule BetPeakWeb.BetLive.Index do
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
     form = to_form(changeset, as: "bet")
     assign(socket, form: form)
+  end
+
+  @impl true
+  def handle_event("go_to_home_to_place_bet", _params, socket) do
+    {:noreply,
+     socket
+     |> redirect(to: ~p"/#featured-games")}
   end
 
   def bet_modal(assigns) do
