@@ -17,6 +17,7 @@ defmodule BetPeak.Accounts.User do
     has_many :sports, BetPeak.Sports.Sport
     has_many :teams, BetPeak.Teams.Team
     has_many :games, BetPeak.Games.Game
+    has_many :bets, BetPeak.Bets.Bet
 
     timestamps(type: :utc_datetime)
   end

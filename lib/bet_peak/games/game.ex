@@ -10,12 +10,14 @@ defmodule BetPeak.Games.Game do
     field :draw_odds, :decimal, default: 0.00
 
     field :result, Ecto.Enum,
-      values: [:pending, :home, :away, :draw, :nil_until_end],
+      values: [:pending, :home, :away, :draw],
       default: :pending
 
     belongs_to :user, BetPeak.Accounts.User
     belongs_to :home_team, BetPeak.Teams.Team, foreign_key: :home_team_id
     belongs_to :away_team, BetPeak.Teams.Team, foreign_key: :away_team_id
+
+    has_many :bets, BetPeak.Bets.Bet
 
     timestamps(type: :utc_datetime)
   end

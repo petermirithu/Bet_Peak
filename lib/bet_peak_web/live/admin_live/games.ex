@@ -292,8 +292,7 @@ defmodule BetPeakWeb.AdminLive.Games do
                     Pending: "pending",
                     "Home Team Won": "home",
                     "Away Team Won": "away",
-                    "Teams Drew": "draw",
-                    "No Team Score": "nil_until_end"
+                    "Teams Drew": "draw"
                   ]}
                   spellcheck="false"
                   required="false"

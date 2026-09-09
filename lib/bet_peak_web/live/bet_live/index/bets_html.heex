@@ -1,0 +1,113 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <section
+    id="user-bets-page"
+    class="mx-auto w-full max-w-[96rem] px-4 py-6 sm:px-6 lg:px-8 lg:py-10"
+  >
+    <header class="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p class="mb-2 text-xs font-bold text-[#947000]">
+          Bet Peak Sportsbook
+        </p>
+        <h1 class="text-3xl font-extrabold text-[#161616]">Bets</h1>
+        <p class="mt-2 text-sm text-[#161616]/55">
+          View all bets, update, and delete them.
+        </p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3 sm:ml-auto sm:justify-end">
+        <div class="flex h-10 rounded-2xl items-center gap-2 border border-[#d8d3c8] bg-white px-4 text-sm font-semibold text-[#161616]/65">
+          <.icon name="hero-ticket" class="size-4 text-[#947000]" /> {length(@bets)} Created
+        </div>
+        <.button
+          class="btn btn-primary rounded-2xl h-10 rounded-2xl items-center gap-2 px-4 text-sm font-semibold text-white"
+          phx-click="open_bet_modal"
+          phx-value-operation="add"
+          phx-value-bet_id=""
+        >
+          <.icon name="hero-plus" class="size-4 text-white" /> Place Bet
+        </.button>
+      </div>
+    </header>
+    <div class="overflow-hidden rounded-2xl border border-[#d8d3c8] bg-white shadow-[0_12px_40px_rgba(22,22,22,0.06)]">
+      <div class="overflow-x-auto">
+        <table id="bets-table" class="table">
+          <thead class="bg-[#161616] text-[0.65rem] text-white/60">
+            <tr>
+              <th class="w-12 text-center">#</th>
+              <th>Match</th>
+              <th>Selection</th>
+              <th>Stake Amount</th>
+              <th>Odds at Placement</th>
+              <th>Potential Payout</th>
+              <th>Status</th>
+              <th>Place At</th>
+              <th><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#ece8de]">
+            <tr
+              :for={{bet, index} <- Enum.with_index(@bets)}
+              :if={@bets != []}
+              id={"bet-row-#{bet.id}"}
+              class="group cursor-pointer transition-colors hover:bg-[#faf7ed]"
+            >
+              <td class="text-center text-xs font-semibold text-[#161616]/35">{index + 1}</td>
+              <td class="whitespace-nowrap">
+                <p class="font-bold text-[#161616]">
+                  {bet.game.home_team.short_form} VS {bet.game.away_team.short_form}
+                </p>
+              </td>
+              <td class="text-sm text-[#161616]/65">{bet.selection}</td>
+              <td class="whitespace-nowrap text-sm text-[#161616]/65">{bet.stake_amount}</td>
+              <td class="whitespace-nowrap text-sm text-[#161616]/65">{bet.odds_at_placement}</td>
+              <td class="whitespace-nowrap text-sm text-[#161616]/65">{bet.potential_payout}</td>
+              <td class="whitespace-nowrap text-sm text-[#161616]/65">{bet.status}</td>
+              <td class="whitespace-nowrap text-xs text-[#161616]/50">
+                {Helpers.format_date(bet.inserted_at)}
+              </td>
+              <td>
+                <.button
+                  class="btn btn-circle btn-secondary transition-transform group-hover:translate-y-1 mr-2"
+                  phx-click="open_bet_modal"
+                  phx-value-operation="edit"
+                  phx-value-bet_id={bet.id}
+                >
+                  <.icon
+                    name="hero-pencil"
+                    class="size-4 text-primary"
+                  />
+                </.button>
+                <.button
+                  class="btn btn-circle btn-error transition-transform group-hover:translate-y-1"
+                  phx-click="open_bet_modal"
+                  phx-value-operation="delete"
+                  phx-value-bet_id={bet.id}
+                >
+                  <.icon
+                    name="hero-trash"
+                    class="size-4 text-white"
+                  />
+                </.button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div :if={@bets == []} class="grid min-h-64 place-items-center px-6 text-center">
+        <div>
+          <.icon name="hero-ticket" class="mx-auto mb-3 size-8 text-[#161616]/25" />
+          <p class="font-semibold text-[#161616]">No bets found</p>
+        </div>
+      </div>
+
+      <.bet_modal
+        selected_bet={@selected_bet}
+        selected_game={@selected_game}
+        show_bet_modal={@show_bet_modal}
+        modal_operation={@modal_operation}
+        odds_at_placement={@odds_at_placement}
+        potential_payout={@potential_payout}
+        form={@form}
+      />
+    </div>
+  </section>
+</Layouts.app>

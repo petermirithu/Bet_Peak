@@ -3,7 +3,6 @@ defmodule BetPeak.Games do
   alias BetPeak.Repo
 
   alias BetPeak.Games.Game
-  alias BetPeak.Accounts.Scope
 
   def fetch_all() do
     Game
@@ -12,8 +11,8 @@ defmodule BetPeak.Games do
     |> Repo.preload(:away_team)
   end
 
-  def get_game(%Scope{} = scope, id) do
-    Repo.get_by!(Game, id: id, user_id: scope.user.id)
+  def get_game(id) do
+    Repo.get_by(Game, id: id)
   end
 
   def save_game(attrs) do

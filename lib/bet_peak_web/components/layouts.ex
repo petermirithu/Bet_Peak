@@ -155,14 +155,12 @@ defmodule BetPeakWeb.Layouts do
                 </.link>
               </li>
               <li>
-                <span class="flex h-11 items-center gap-3 px-3 text-sm font-semibold text-white/45">
-                  <.icon name="hero-trophy" class="size-5" /> Football
-                </span>
-              </li>
-              <li>
-                <span class="flex h-11 items-center gap-3 px-3 text-sm font-semibold text-white/45">
-                  <.icon name="hero-chart-bar" class="size-5" /> Baseball
-                </span>
+                <.link
+                  navigate={~p"/bets"}
+                  class="flex h-11 items-center gap-3 px-3 text-sm font-semibold text-white/70 transition hover:bg-white/8 hover:text-white"
+                >
+                  <.icon name="hero-ticket" class="size-5 text-[#f4bf25]" /> Bets Placed
+                </.link>
               </li>
             </ul>
 
