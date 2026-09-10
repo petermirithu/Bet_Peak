@@ -29,7 +29,7 @@
     </header>
     <div class="overflow-hidden rounded-2xl border border-[#d8d3c8] bg-white shadow-[0_12px_40px_rgba(22,22,22,0.06)]">
       <div class="overflow-x-auto">
-        <table id="teams-table" class="table">
+        <table id="teams-table" class="table table-sm">
           <thead class="bg-[#161616] text-[0.65rem] text-white/60">
             <tr>
               <th class="w-12 text-center">#</th>
@@ -51,9 +51,9 @@
               <td class="whitespace-nowrap">
                 <p class="font-bold text-[#161616]">{team.name}</p>
               </td>
-              <td class="whitespace-wrap text-sm text-[#161616]/65">{team.about}</td>
-              <td class="whitespace-nowrap text-sm text-[#161616]/65">{team.short_form}</td>
-              <td class="whitespace-nowrap text-sm text-[#161616]/65">{team.sport.name}</td>
+              <td class="whitespace-wrap text-xs text-[#161616]/65">{team.about}</td>
+              <td class="whitespace-nowrap text-xs text-[#161616]/65">{team.short_form}</td>
+              <td class="whitespace-nowrap text-xs text-[#161616]/65">{team.sport.name}</td>
               <td class="whitespace-nowrap text-xs text-[#161616]/50">
                 {Helpers.format_date(team.inserted_at)}
               </td>

@@ -81,7 +81,10 @@ defmodule BetPeakWeb.AdminLive.Games do
 
   @impl true
   def handle_event("save_game", %{"game" => game_params}, socket) do
-    new_game_params = Map.put(game_params, "user_id", socket.assigns.current_scope.user.id)
+    new_game_params =
+      game_params
+      |> Map.put("user_id", socket.assigns.current_scope.user.id)
+      |> Map.put("status", :scheduled)
 
     case Games.save_game(new_game_params) do
       {:ok, _game} ->

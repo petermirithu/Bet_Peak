@@ -49,7 +49,7 @@
     </header>
     <div class="overflow-hidden rounded-2xl border border-[#d8d3c8] bg-white shadow-[0_12px_40px_rgba(22,22,22,0.06)]">
       <div class="overflow-x-auto">
-        <table id="bets-table" class="table">
+        <table id="bets-table" class="table table-sm">
           <thead class="bg-[#161616] text-[0.65rem] text-white/60">
             <tr>
               <th class="w-12 text-center">#</th>
@@ -77,13 +77,13 @@
                   {bet.game.home_team.short_form} VS {bet.game.away_team.short_form}
                 </p>
               </td>
-              <td class="text-sm text-[#161616]/65">{bet.selection}</td>
-              <td class="whitespace-nowrap text-sm text-[#161616]/65">KES {bet.stake_amount}</td>
-              <td class="whitespace-nowrap text-sm text-[#161616]/65">{bet.odds_at_placement}</td>
-              <td class="whitespace-nowrap text-sm text-[#161616]/65">
+              <td class="text-xs text-[#161616]/65">{bet.selection}</td>
+              <td class="whitespace-nowrap text-xs text-[#161616]/65">KES {bet.stake_amount}</td>
+              <td class="whitespace-nowrap text-xs text-[#161616]/65">{bet.odds_at_placement}</td>
+              <td class="whitespace-nowrap text-xs text-[#161616]/65">
                 KES {bet.potential_payout}
               </td>
-              <td class="whitespace-nowrap text-sm text-[#161616]/65">{bet.status}</td>
+              <td class="whitespace-nowrap text-xs text-[#161616]/65">{bet.status}</td>
               <td class="whitespace-nowrap text-xs text-[#161616]/50">
                 {Helpers.format_date(bet.inserted_at)}
               </td>

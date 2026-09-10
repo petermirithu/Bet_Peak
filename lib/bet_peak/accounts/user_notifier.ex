@@ -14,12 +14,9 @@ defmodule BetPeak.Accounts.UserNotifier do
       |> text_body(body)
 
     with {:ok, _metadata} <- Mailer.deliver(email) do
-      # IO.inspect("====== SENT EMAIL =====")
       {:ok, email}
     else
       {:error, reason} ->
-        # IO.inspect("====== ERROR =====")
-        # IO.inspect(reason)
         {:error, reason}
     end
   end

@@ -245,7 +245,7 @@ defmodule BetPeakWeb.BetLive.Index do
       phx-window-keydown="close_bet_modal"
       phx-key="escape"
     >
-      <div class="modal-box max-h-[90vh] max-w-3xl overflow-y-auto rounded-lg bg-[#f8f6f0] p-0 text-[#161616] shadow-2xl">
+      <div class="modal-box max-h-[90vh] max-w-2xl overflow-y-auto rounded-lg bg-[#f8f6f0] p-0 text-[#161616] shadow-2xl">
         <button
           id="close-bet-modal"
           type="button"

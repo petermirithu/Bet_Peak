@@ -5,6 +5,13 @@ defmodule BetPeak.Bets do
   alias BetPeak.Bets.Bet
   alias BetPeak.Accounts.Scope
   alias BetPeak.Bets.BetNotifier
+  alias BetPeak.BetSettlement.SettleBetWorker
+  alias Oban
+
+  def fetch_all() do
+    Bet
+    |> Repo.all()
+  end
 
   def fetch_active(user_id) do
     Bet
@@ -24,6 +31,17 @@ defmodule BetPeak.Bets do
     |> Map.put(:bets, bets)
   end
 
+  def fetch_admin_user_bets(user_id) do
+    bets =
+      from(bet in Bet, where: bet.user_id == ^user_id)
+      |> Repo.all()
+      |> Repo.preload(:game)
+      |> Repo.preload(game: :home_team, game: :away_team)
+
+    calculate_total_payouts(bets)
+    |> Map.put(:bets, bets)
+  end
+
   defp calculate_total_payouts(bets) do
     Enum.reduce(bets, %{won: Decimal.new("0.0"), lost: Decimal.new("0.0")}, fn bet, acc ->
       case bet.status do
@@ -31,7 +49,10 @@ defmodule BetPeak.Bets do
           Map.put(acc, :won, Decimal.add(acc.won, bet.potential_payout))
 
         :lost ->
-          Map.put(acc, :lost, Decimal.add(acc.won, bet.potential_payout))
+          Map.put(acc, :lost, Decimal.add(acc.lost, bet.potential_payout))
+
+        _ ->
+          acc
       end
     end)
   end
@@ -56,43 +77,76 @@ defmodule BetPeak.Bets do
     |> Repo.update()
   end
 
-  def settle_game_bets(game_id, selection) do
-    # Query to update bets won
-    Bet
-    |> Repo.all_by(game_id: game_id, status: :pending)
-    |> Repo.preload(:user)
-    |> Repo.preload(:game)
-    |> Repo.preload(game: :home_team)
-    |> Repo.preload(game: :away_team)
-    |> update_bets_won_and_lost(selection)
+  def settle_game_bets(game_id, game_result) do
+    max_stake_amount =
+      Repo.one(
+        from bet in Bet,
+          where: bet.game_id == ^game_id and bet.status == :pending,
+          select: max(bet.stake_amount)
+      ) || 0
+
+    query =
+      from(
+        bet in Bet,
+        where: bet.game_id == ^game_id and bet.status == :pending
+      )
+
+    Repo.transaction(fn ->
+      query
+      |> Repo.stream()
+      |> Stream.chunk_every(100)
+      |> Enum.each(fn bets ->
+        bets
+        |> create_oban_jobs(max_stake_amount, game_result)
+        |> Oban.insert_all()
+      end)
+    end)
   end
 
-  defp update_bets_won_and_lost(bets, selection) do
-    # Update bets won
-    bets
-    |> Enum.filter(&(&1.selection == selection))
-    |> update_bets_won()
-    |> Enum.each(fn bet -> BetNotifier.send_bet_won_email(bet) end)
+  defp create_oban_jobs(bets, max_stake_amount, game_result) do
+    Enum.map(
+      bets,
+      fn bet ->
+        ratio = Decimal.div(bet.stake_amount, max_stake_amount)
 
-    # Update bets lost
-    bets
-    |> Enum.filter(&(&1.selection != selection))
-    |> update_bets_lost()
-    |> Enum.each(fn bet -> BetNotifier.send_bet_lost_email(bet) end)
+        oban_priority =
+          cond do
+            Decimal.gte?(ratio, Decimal.new("0.75")) -> 0
+            Decimal.gte?(ratio, Decimal.new("0.50")) -> 1
+            Decimal.gte?(ratio, Decimal.new("0.25")) -> 2
+            true -> 3
+          end
+
+        SettleBetWorker.new(
+          %{bet_id: bet.id, game_result: game_result},
+          priority: oban_priority
+        )
+      end
+    )
   end
 
-  defp update_bets_won(bets) do
-    from(bet in Bet, where: bet.id in ^Enum.map(bets, & &1.id))
-    |> Repo.update_all(set: [status: :won, updated_at: DateTime.utc_now()])
+  def settle_bet_and_send_mail(bet_id, game_result) do
+    bet =
+      Bet
+      |> Repo.get(bet_id)
+      |> Repo.preload(:user)
+      |> Repo.preload(:game)
+      |> Repo.preload(game: :home_team)
+      |> Repo.preload(game: :away_team)
 
-    bets
+    new_status = if(Atom.to_string(bet.selection) == game_result, do: :won, else: :lost)
+
+    bet
+    |> Ecto.Changeset.change(%{status: new_status})
+    |> Repo.update!()
+    |> send_betting_email()
   end
 
-  defp update_bets_lost(bets) do
-    from(bet in Bet, where: bet.id in ^Enum.map(bets, & &1.id))
-    |> Repo.update_all(set: [status: :lost, updated_at: DateTime.utc_now()])
-
-    bets
+  defp send_betting_email(bet) do
+    case bet.status do
+      :won -> BetNotifier.send_bet_won_email(bet)
+      :lost -> BetNotifier.send_bet_lost_email(bet)
+    end
   end
 
   def delete_bet(bet) do

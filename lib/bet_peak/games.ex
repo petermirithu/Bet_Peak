@@ -35,23 +35,23 @@ defmodule BetPeak.Games do
   end
 
   def update_game(game, attrs) do
-    game
-    |> Game.changeset(attrs, [])
-    |> Repo.update()
-    |> settle_bets()
-  end
+    previous_status = game.status
 
-  defp settle_bets(result) do
+    result =
+      game
+      |> Game.changeset(attrs, [])
+      |> Repo.update()
+
     case result do
-      {:ok, game} ->
-        if game.status == :finished do
-          Bets.settle_game_bets(game.id, game.result)
+      {:ok, updated_game} ->
+        if previous_status != :finished and updated_game.status == :finished do
+          Bets.settle_game_bets(updated_game.id, updated_game.result)
         end
 
         result
 
-      _ ->
-        result
+      error ->
+        error
     end
   end
 

@@ -29,7 +29,7 @@
     </header>
     <div class="overflow-hidden rounded-2xl border border-[#d8d3c8] bg-white shadow-[0_12px_40px_rgba(22,22,22,0.06)]">
       <div class="overflow-x-auto">
-        <table id="games-table" class="table">
+        <table id="games-table" class="table table-sm">
           <thead class="bg-[#161616] text-[0.65rem] text-white/60">
             <tr>
               <th class="w-12 text-center">#</th>
@@ -56,12 +56,12 @@
                   {game.home_team.short_form} VS {game.away_team.short_form}
                 </p>
               </td>
-              <td class="text-sm text-[#161616]/65">{Helpers.format_date(game.starts_at)}</td>
-              <td class="whitespace-nowrap text-sm text-[#161616]/65">{game.home_odds}</td>
-              <td class="whitespace-nowrap text-sm text-[#161616]/65">{game.draw_odds}</td>
-              <td class="whitespace-nowrap text-sm text-[#161616]/65">{game.away_odds}</td>
-              <td class="whitespace-nowrap text-sm text-[#161616]/65">{game.status}</td>
-              <td class="whitespace-nowrap text-sm text-[#161616]/65">{game.result}</td>
+              <td class="text-xs text-[#161616]/65">{Helpers.format_date(game.starts_at)}</td>
+              <td class="whitespace-nowrap text-xs text-[#161616]/65">{game.home_odds}</td>
+              <td class="whitespace-nowrap text-xs text-[#161616]/65">{game.draw_odds}</td>
+              <td class="whitespace-nowrap text-xs text-[#161616]/65">{game.away_odds}</td>
+              <td class="whitespace-nowrap text-xs text-[#161616]/65">{game.status}</td>
+              <td class="whitespace-nowrap text-xs text-[#161616]/65">{game.result}</td>
               <td class="whitespace-nowrap text-xs text-[#161616]/50">
                 {Helpers.format_date(game.inserted_at)}
               </td>

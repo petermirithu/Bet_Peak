@@ -21,7 +21,7 @@
 
     <div class="overflow-hidden rounded-2xl border border-[#d8d3c8] bg-white shadow-[0_12px_40px_rgba(22,22,22,0.06)]">
       <div class="overflow-x-auto">
-        <table id="users-table" class="table">
+        <table id="users-table" class="table table-sm">
           <thead class="bg-[#161616] text-[0.65rem] text-white/60">
             <tr>
               <th class="w-12 text-center">#</th>
@@ -55,8 +55,8 @@
                   </div>
                 </div>
               </td>
-              <td class="text-sm text-[#161616]/65">{user.email}</td>
-              <td class="whitespace-nowrap text-sm text-[#161616]/65">{user.msisdn}</td>
+              <td class="text-xs text-[#161616]/65">{user.email}</td>
+              <td class="whitespace-nowrap text-xs text-[#161616]/65">{user.msisdn}</td>
               <td>
                 <span class="inline-flex rounded-2xl bg-[#eee9dc] px-2.5 py-1 text-xs font-bold capitalize text-[#68531a]">
                   {user.role}
@@ -112,6 +112,7 @@
       modal_operation={@modal_operation}
       form={@form}
       current_scope={@current_scope}
+      user_bets_stats={@user_bets_stats}
     />
   </section>
 </Layouts.app>
