@@ -3,18 +3,17 @@ defmodule BetPeak.Bets do
 
   alias BetPeak.Repo
   alias BetPeak.Bets.Bet
-  alias BetPeak.Accounts.Scope
   alias BetPeak.Bets.BetNotifier
   alias BetPeak.BetSettlement.SettleBetWorker
   alias Oban
 
   def fetch_all() do
-    Bet
+    from(bet in Bet, where: is_nil(bet.deleted_at))
     |> Repo.all()
   end
 
   def fetch_active(user_id) do
-    Bet
+    from(bet in Bet, where: is_nil(bet.deleted_at))
     |> Repo.all_by(status: :pending, user_id: user_id)
     |> Repo.preload(:game)
     |> Repo.preload(game: :home_team, game: :away_team)
@@ -22,7 +21,11 @@ defmodule BetPeak.Bets do
 
   def fetch_history(user_id) do
     bets =
-      from(bet in Bet, where: bet.user_id == ^user_id and bet.status in [:won, :lost, :cancelled])
+      from(bet in Bet,
+        where:
+          is_nil(bet.deleted_at) and bet.user_id == ^user_id and
+            bet.status in [:won, :lost, :cancelled]
+      )
       |> Repo.all()
       |> Repo.preload(:game)
       |> Repo.preload(game: :home_team, game: :away_team)
@@ -33,7 +36,7 @@ defmodule BetPeak.Bets do
 
   def fetch_admin_user_bets(user_id) do
     bets =
-      from(bet in Bet, where: bet.user_id == ^user_id)
+      from(bet in Bet, where: is_nil(bet.deleted_at) and bet.user_id == ^user_id)
       |> Repo.all()
       |> Repo.preload(:game)
       |> Repo.preload(game: :home_team, game: :away_team)
@@ -57,10 +60,6 @@ defmodule BetPeak.Bets do
     end)
   end
 
-  def get_bet(%Scope{} = scope, id) do
-    Repo.get_by!(Bet, id: id, user_id: scope.user.id)
-  end
-
   def save_bet(attrs) do
     %Bet{}
     |> Bet.changeset(attrs, [])
@@ -81,14 +80,14 @@ defmodule BetPeak.Bets do
     max_stake_amount =
       Repo.one(
         from bet in Bet,
-          where: bet.game_id == ^game_id and bet.status == :pending,
+          where: is_nil(bet.deleted_at) and bet.game_id == ^game_id and bet.status == :pending,
           select: max(bet.stake_amount)
       ) || 0
 
     query =
       from(
         bet in Bet,
-        where: bet.game_id == ^game_id and bet.status == :pending
+        where: is_nil(bet.deleted_at) and bet.game_id == ^game_id and bet.status == :pending
       )
 
     Repo.transaction(fn ->
@@ -127,8 +126,7 @@ defmodule BetPeak.Bets do
 
   def settle_bet_and_send_mail(bet_id, game_result) do
     bet =
-      Bet
-      |> Repo.get(bet_id)
+      from(bet in Bet, where: is_nil(bet.deleted_at) and bet.id == ^bet_id)
       |> Repo.preload(:user)
       |> Repo.preload(:game)
       |> Repo.preload(game: :home_team)
@@ -149,7 +147,9 @@ defmodule BetPeak.Bets do
     end
   end
 
-  def delete_bet(bet) do
-    Repo.delete(bet)
+  def delete_bet(%Bet{} = bet) do
+    bet
+    |> Ecto.Changeset.change(%{deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
+    |> Repo.update()
   end
 end

@@ -14,6 +14,8 @@ defmodule BetPeak.Bets.Bet do
       values: [:pending, :won, :lost, :cancelled],
       default: :pending
 
+    field :deleted_at, :utc_datetime
+
     belongs_to :user, BetPeak.Accounts.User
     belongs_to :game, BetPeak.Games.Game
 
