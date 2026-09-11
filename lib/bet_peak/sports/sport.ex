@@ -9,7 +9,7 @@ defmodule BetPeak.Sports.Sport do
     field :slug, :string
 
     belongs_to :user, BetPeak.Accounts.User
-    has_many :teams, BetPeak.Teams.Teams
+    has_many :teams, BetPeak.Teams.Team
 
     timestamps(type: :utc_datetime)
   end

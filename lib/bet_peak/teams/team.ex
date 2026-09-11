@@ -6,6 +6,8 @@ defmodule BetPeak.Teams.Team do
     field :name, :string
     field :short_form, :string
     field :about, :string
+    field :deleted_at, :utc_datetime
+
     belongs_to :user, BetPeak.Accounts.User
     belongs_to :sport, BetPeak.Sports.Sport
 

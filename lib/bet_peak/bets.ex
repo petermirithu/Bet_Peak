@@ -153,7 +153,7 @@ defmodule BetPeak.Bets do
     |> Repo.update()
   end
 
-  def delete_game_bets(game_id) do
+  def delete_bets_by_game_id(game_id) do
     from(bet in Bet, where: bet.game_id == ^game_id and is_nil(bet.deleted_at))
     |> Repo.update_all(set: [deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)])
   end

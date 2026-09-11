@@ -64,16 +64,27 @@ defmodule BetPeak.Games do
     game
     |> Ecto.Changeset.change(%{deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
     |> Repo.update()
-    |> case do
-      {:ok, updated_game} ->
-        %{table: "bets", id: updated_game.id}
-        |> Workers.SoftDelete.new()
-        |> Oban.insert()
+    |> Workers.SoftDelete.delete_children_records("bets")
+  end
 
-        {:ok, updated_game}
+  def delete_games_by_team_id(team_id) do
+    query =
+      from(game in Game,
+        where:
+          (game.home_team_id == ^team_id or game.away_team_id == ^team_id) and
+            is_nil(game.deleted_at)
+      )
 
-      {:error, changeset} ->
-        {:error, changeset}
-    end
+    query
+    |> Repo.all()
+    |> soft_delete_games(query)
+    |> Enum.each(fn game ->
+      Workers.SoftDelete.delete_children_records({:ok, game}, "bets")
+    end)
+  end
+
+  defp soft_delete_games(games, query) do
+    Repo.update_all(query, set: [deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)])
+    games
   end
 end

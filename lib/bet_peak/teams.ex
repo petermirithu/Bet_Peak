@@ -3,16 +3,12 @@ defmodule BetPeak.Teams do
   alias BetPeak.Repo
 
   alias BetPeak.Teams.Team
-  alias BetPeak.Accounts.Scope
+  alias BetPeak.Workers
 
   def fetch_all() do
-    Team
+    from(team in Team, where: is_nil(team.deleted_at))
     |> Repo.all()
     |> Repo.preload(:sport)
-  end
-
-  def get_team(%Scope{} = scope, id) do
-    Repo.get_by!(Team, id: id, user_id: scope.user.id)
   end
 
   def save_team(attrs) do
@@ -32,6 +28,9 @@ defmodule BetPeak.Teams do
   end
 
   def delete_team(team) do
-    Repo.delete(team)
+    team
+    |> Ecto.Changeset.change(%{deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
+    |> Repo.update()
+    |> Workers.SoftDelete.delete_children_records("games")
   end
 end
