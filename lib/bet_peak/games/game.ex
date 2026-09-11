@@ -10,12 +10,16 @@ defmodule BetPeak.Games.Game do
     field :draw_odds, :decimal, default: 0.00
 
     field :result, Ecto.Enum,
-      values: [:pending, :home, :away, :draw, :nil_until_end],
+      values: [:pending, :home, :away, :draw],
       default: :pending
+
+    field :deleted_at, :utc_datetime
 
     belongs_to :user, BetPeak.Accounts.User
     belongs_to :home_team, BetPeak.Teams.Team, foreign_key: :home_team_id
     belongs_to :away_team, BetPeak.Teams.Team, foreign_key: :away_team_id
+
+    has_many :bets, BetPeak.Bets.Bet
 
     timestamps(type: :utc_datetime)
   end
@@ -50,6 +54,7 @@ defmodule BetPeak.Games.Game do
     |> validate_number(:home_odds, greater_than: Decimal.new("1.0"))
     |> validate_number(:away_odds, greater_than: Decimal.new("1.0"))
     |> validate_number(:draw_odds, greater_than: Decimal.new("1.0"))
+    |> validate_status_result()
   end
 
   defp validate_starts_at_in_future(changeset) do
@@ -71,6 +76,19 @@ defmodule BetPeak.Games.Game do
       add_error(changeset, :away_team_id, "Home team and away team cannot be the same team.")
     else
       changeset
+    end
+  end
+
+  defp validate_status_result(changeset) do
+    status = get_field(changeset, :status)
+    result = Map.get(changeset.changes, :result, Map.get(changeset.data, :result, :pending))
+
+    case {status, result} do
+      {:finished, :pending} ->
+        add_error(changeset, :status, "Game can't be finished and result is Pending")
+
+      _ ->
+        changeset
     end
   end
 end

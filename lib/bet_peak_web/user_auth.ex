@@ -17,21 +17,8 @@ defmodule BetPeakWeb.UserAuth do
     same_site: "Lax"
   ]
 
-  # How old the session token should be before a new one is issued. When a request is made
-  # with a session token older than this value, then a new session token will be created
-  # and the session and remember-me cookies (if set) will be updated with the new token.
-  # Lowering this value will result in more tokens being created by active users. Increasing
-  # it will result in less time before a session token expires for a user to get issued a new
-  # token. This can be set to a value greater than `@max_cookie_age_in_days` to disable
-  # the reissuing of tokens completely.
   @session_reissue_age_in_days 7
 
-  @doc """
-  Logs the user in.
-
-  Redirects to the session's `:user_return_to` path
-  or falls back to the `signed_in_path/1`.
-  """
   def log_in_user(conn, user, params \\ %{}) do
     user_return_to = get_session(conn, :user_return_to)
 
@@ -41,11 +28,6 @@ defmodule BetPeakWeb.UserAuth do
     |> redirect(to: user_return_to || signed_in_path(conn))
   end
 
-  @doc """
-  Logs the user out.
-
-  It clears all session data for safety. See renew_session.
-  """
   def log_out_user(conn) do
     user_token = get_session(conn, :user_token)
     user_token && Accounts.delete_user_session_token(user_token)
@@ -60,11 +42,6 @@ defmodule BetPeakWeb.UserAuth do
     |> redirect(to: ~p"/users/log-in")
   end
 
-  @doc """
-  Authenticates the user by looking into the session and remember me token.
-
-  Will reissue the session token if it is older than the configured age.
-  """
   def fetch_current_scope_for_user(conn, _opts) do
     with {token, conn} <- ensure_user_token(conn),
          {user, token_inserted_at} <- Accounts.get_user_by_session_token(token) do
@@ -101,14 +78,6 @@ defmodule BetPeakWeb.UserAuth do
     end
   end
 
-  # This function is the one responsible for creating session tokens
-  # and storing them safely in the session and cookies. It may be called
-  # either when logging in, during sudo mode, or to renew a session which
-  # will soon expire.
-  #
-  # When the session is created, rather than extended, the renew_session
-  # function will clear the session to avoid fixation attacks. See the
-  # renew_session function to customize this behaviour.
   defp create_or_extend_session(conn, user, params) do
     token = Accounts.generate_user_session_token(user)
     remember_me = get_session(conn, :user_remember_me)
@@ -119,28 +88,10 @@ defmodule BetPeakWeb.UserAuth do
     |> maybe_write_remember_me_cookie(token, params, remember_me)
   end
 
-  # Do not renew session if the user is already logged in
-  # to prevent CSRF errors or data being lost in tabs that are still open
   defp renew_session(conn, user) when conn.assigns.current_scope.user.id == user.id do
     conn
   end
 
-  # This function renews the session ID and erases the whole
-  # session to avoid fixation attacks. If there is any data
-  # in the session you may want to preserve after log in/log out,
-  # you must explicitly fetch the session data before clearing
-  # and then immediately set it after clearing, for example:
-  #
-  #     defp renew_session(conn, _user) do
-  #       delete_csrf_token()
-  #       preferred_locale = get_session(conn, :preferred_locale)
-  #
-  #       conn
-  #       |> configure_session(renew: true)
-  #       |> clear_session()
-  #       |> put_session(:preferred_locale, preferred_locale)
-  #     end
-  #
   defp renew_session(conn, _user) do
     delete_csrf_token()
 
@@ -169,9 +120,6 @@ defmodule BetPeakWeb.UserAuth do
     |> put_session(:live_socket_id, user_session_topic(token))
   end
 
-  @doc """
-  Disconnects existing sockets for the given tokens.
-  """
   def disconnect_sessions(tokens) do
     Enum.each(tokens, fn %{token: token} ->
       BetPeakWeb.Endpoint.broadcast(user_session_topic(token), "disconnect", %{})
@@ -180,38 +128,6 @@ defmodule BetPeakWeb.UserAuth do
 
   defp user_session_topic(token), do: "users_sessions:#{Base.url_encode64(token)}"
 
-  @doc """
-  Handles mounting and authenticating the current_scope in LiveViews.
-
-  ## `on_mount` arguments
-
-    * `:mount_current_scope` - Assigns current_scope
-      to socket assigns based on user_token, or nil if
-      there's no user_token or no matching user.
-
-    * `:require_authenticated` - Authenticates the user from the session,
-      and assigns the current_scope to socket assigns based
-      on user_token.
-      Redirects to login page if there's no logged user.
-
-  ## Examples
-
-  Use the `on_mount` lifecycle macro in LiveViews to mount or authenticate
-  the `current_scope`:
-
-      defmodule BetPeakWeb.PageLive do
-        use BetPeakWeb, :live_view
-
-        on_mount {BetPeakWeb.UserAuth, :mount_current_scope}
-        ...
-      end
-
-  Or use the `live_session` of your router to invoke the on_mount callback:
-
-      live_session :authenticated, on_mount: [{BetPeakWeb.UserAuth, :require_authenticated}] do
-        live "/profile", ProfileLive, :index
-      end
-  """
   def on_mount(:mount_current_scope, _params, session, socket) do
     {:cont, mount_current_scope(socket, session)}
   end
@@ -257,17 +173,12 @@ defmodule BetPeakWeb.UserAuth do
     end)
   end
 
-  @doc "Returns the path to redirect to after log in."
-  # the user was already logged in, redirect to settings
   def signed_in_path(%Plug.Conn{assigns: %{current_scope: %Scope{user: %Accounts.User{}}}}) do
-    ~p"/users/settings"
+    ~p"/"
   end
 
   def signed_in_path(_), do: ~p"/"
 
-  @doc """
-  Plug for routes that require the user to be authenticated.
-  """
   def require_authenticated_user(conn, _opts) do
     if conn.assigns.current_scope && conn.assigns.current_scope.user do
       conn

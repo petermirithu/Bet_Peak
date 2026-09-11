@@ -1,8 +1,9 @@
 defmodule BetPeakWeb.AdminLive.Users do
   use BetPeakWeb, :live_view
 
-  alias BetPeak.Accounts
   alias BetPeakWeb.Helpers
+  alias BetPeak.Accounts
+  alias BetPeak.Bets
 
   @impl true
   def mount(_params, _session, socket) do
@@ -15,7 +16,8 @@ defmodule BetPeakWeb.AdminLive.Users do
      |> assign(show_user_modal: false)
      |> assign(modal_operation: "account_info")
      |> assign(changeset: %{})
-     |> assign(form: nil)}
+     |> assign(form: nil)
+     |> assign(user_bets_stats: [])}
   end
 
   @impl true
@@ -41,7 +43,17 @@ defmodule BetPeakWeb.AdminLive.Users do
 
   @impl true
   def handle_event("update_modal_operation", %{"operation" => operation}, socket) do
-    {:noreply, assign(socket, :modal_operation, operation)}
+    user_bets_stats =
+      if operation == "account_bets" do
+        Bets.fetch_admin_user_bets(socket.assigns.selected_user.id)
+      else
+        []
+      end
+
+    {:noreply,
+     socket
+     |> assign(modal_operation: operation)
+     |> assign(user_bets_stats: user_bets_stats)}
   end
 
   @impl true
@@ -141,7 +153,7 @@ defmodule BetPeakWeb.AdminLive.Users do
             </div>
           </header>
 
-          <div class="grid grid-cols-3 border-b border-[#ded9ce] bg-white px-4 sm:px-8">
+          <div class="grid grid-cols-4 border-b border-[#ded9ce] bg-white px-4 sm:px-8">
             <.button
               id="account-info-tab"
               class={[
@@ -155,6 +167,20 @@ defmodule BetPeakWeb.AdminLive.Users do
               phx-value-operation="account_info"
             >
               Account Info
+            </.button>
+            <.button
+              id="account-bets-tab"
+              class={[
+                "h-12 border-b-2 px-2 text-xs font-bold transition sm:text-sm",
+                if(@modal_operation == "account_bets",
+                  do: "border-[#b28708] text-[#735700]",
+                  else: "border-transparent text-[#161616]/45 hover:text-[#161616]"
+                )
+              ]}
+              phx-click="update_modal_operation"
+              phx-value-operation="account_bets"
+            >
+              Bets Placed
             </.button>
             <.button
               id="account-update-tab"
@@ -205,6 +231,93 @@ defmodule BetPeakWeb.AdminLive.Users do
             </dl>
           </div>
 
+          <div :if={@modal_operation == "account_bets"} class="p-6 sm:p-8">
+            <div class="overflow-hidden rounded-2xl border border-[#d8d3c8] bg-white shadow-[0_12px_40px_rgba(22,22,22,0.06)]">
+              <div class="overflow-x-auto">
+                <table id="bets-table" class="table table-xs">
+                  <thead class="bg-[#161616] text-[0.65rem] text-white/60">
+                    <tr>
+                      <th class="w-12 text-center">#</th>
+                      <th>Match</th>
+                      <th>Selection</th>
+                      <th>Stake Amount</th>
+                      <th>Odds at Placement</th>
+                      <th>Potential Payout</th>
+                      <th>Status</th>
+                      <th>Place At</th>
+                      <th>Matured At</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-[#ece8de]">
+                    <tr
+                      :for={{bet, index} <- Enum.with_index(@user_bets_stats.bets)}
+                      :if={@user_bets_stats.bets != []}
+                      id={"bet-row-#{bet.id}"}
+                      class="group cursor-pointer transition-colors hover:bg-[#faf7ed]"
+                    >
+                      <td class="text-center text-xs font-semibold text-[#161616]/35">{index + 1}</td>
+                      <td class="whitespace-nowrap">
+                        <p class="font-bold text-[#161616]">
+                          {bet.game.home_team.short_form} VS {bet.game.away_team.short_form}
+                        </p>
+                      </td>
+                      <td class="text-xs text-[#161616]/65">{bet.selection}</td>
+                      <td class="whitespace-nowrap text-xs text-[#161616]/65">
+                        KES {bet.stake_amount}
+                      </td>
+                      <td class="whitespace-nowrap text-xs text-[#161616]/65">
+                        {bet.odds_at_placement}
+                      </td>
+                      <td class="whitespace-nowrap text-xs text-[#161616]/65">
+                        KES {bet.potential_payout}
+                      </td>
+                      <td class="whitespace-nowrap text-xs text-[#161616]/65">{bet.status}</td>
+                      <td class="whitespace-nowrap text-xs text-[#161616]/50">
+                        {Helpers.format_date(bet.inserted_at)}
+                      </td>
+                      <td class="whitespace-nowrap text-xs text-[#161616]/50">
+                        <span :if={bet.status == :pending}>
+                          -
+                        </span>
+                        <span :if={bet.status != :pending}>
+                          {Helpers.format_date(bet.updated_at)}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div
+                :if={@user_bets_stats.bets == []}
+                class="grid min-h-64 place-items-center px-6 text-center"
+              >
+                <div>
+                  <.icon name="hero-ticket" class="mx-auto mb-3 size-8 text-[#161616]/25" />
+                  <p class="font-semibold text-[#161616]">No bets found</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end border-t border-[#ded9ce] mt-5">
+              <div class="flex mt-5 flex-wrap items-center gap-3 sm:ml-auto sm:justify-end">
+                <div class="flex h-10 rounded-2xl items-center gap-2 border border-[#d8d3c8] bg-white px-4 text-sm font-semibold text-[#161616]/65">
+                  <.icon name="hero-ticket" class="size-4 text-[#947000]" />
+                  {length(@user_bets_stats.bets)} Bets
+                </div>
+
+                <div class="flex h-10 rounded-2xl items-center gap-2 border border-[#d8d3c8] bg-white px-4 text-sm font-semibold text-[#161616]/65">
+                  <.icon name="hero-arrow-trending-up" class="size-4 text-green-600" />
+                  Wins: KES {@user_bets_stats.won}
+                </div>
+
+                <div class="flex h-10 rounded-2xl items-center gap-2 border border-[#d8d3c8] bg-white px-4 text-sm font-semibold text-[#161616]/65">
+                  <.icon name="hero-arrow-trending-down" class="size-4 text-red-600" />
+                  Losses: KES {@user_bets_stats.lost}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div :if={@modal_operation == "account_update"} class="p-6 sm:p-8">
             <div class="mb-6">
               <h3 class="font-bold">Account access</h3>
@@ -221,11 +334,11 @@ defmodule BetPeakWeb.AdminLive.Users do
               class="space-y-6"
             >
               <div class="grid gap-6 sm:grid-cols-2">
-                <%!-- disabled={can_elevate_user(@current_scope, @selected_user)} --%>
                 <fieldset
                   id="user-role-group"
                   class="fieldset mb-2 w-full"
                   aria-labelledby="user-role-label"
+                  disabled={can_elevate_user(@current_scope, @selected_user)}
                 >
                   <span id="user-role-label" class="label mb-1">Select Role</span>
                   <div class="grid grid-cols-2 gap-1 rounded-2xl border border-[#d7d2c7] bg-white p-1 transition focus-within:border-[#b28708] focus-within:ring-2 focus-within:ring-[#f4bf25]/20">
@@ -259,11 +372,11 @@ defmodule BetPeakWeb.AdminLive.Users do
                   </div>
                 </fieldset>
 
-                <%!-- disabled={can_elevate_user(@current_scope, @selected_user)} --%>
                 <fieldset
                   id="user-superuser-group"
                   class="fieldset mb-2 w-full"
                   aria-labelledby="user-superuser-label"
+                  disabled={can_elevate_user(@current_scope, @selected_user)}
                 >
                   <span id="user-superuser-label" class="label mb-1">Is Super User</span>
                   <div class="grid grid-cols-2 gap-1 rounded-2xl border border-[#d7d2c7] bg-white p-1 transition focus-within:border-[#b28708] focus-within:ring-2 focus-within:ring-[#f4bf25]/20">
@@ -300,8 +413,8 @@ defmodule BetPeakWeb.AdminLive.Users do
               </div>
 
               <div class="flex justify-end border-t border-[#ded9ce] pt-5">
-                <%!-- disabled={can_elevate_user(@current_scope, @selected_user)} --%>
                 <.button
+                  disabled={can_elevate_user(@current_scope, @selected_user)}
                   phx-disable-with="Saving access ..."
                   class="group rounded-2xl flex h-11 items-center justify-center gap-2 bg-[#161616] px-6 text-sm font-bold text-white transition hover:bg-[#735700] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b28708]"
                 >

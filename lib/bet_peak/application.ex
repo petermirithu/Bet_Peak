@@ -10,6 +10,7 @@ defmodule BetPeak.Application do
     children = [
       BetPeakWeb.Telemetry,
       BetPeak.Repo,
+      {Oban, Application.fetch_env!(:bet_peak, Oban)},
       {DNSCluster, query: Application.get_env(:bet_peak, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: BetPeak.PubSub},
       # Start a worker by calling: BetPeak.Worker.start_link(arg)

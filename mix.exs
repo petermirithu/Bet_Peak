@@ -75,7 +75,8 @@ defmodule BetPeak.MixProject do
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
       {:mail, ">= 0.0.0"},
-      {:gen_smtp, "~> 1.2 or ~> 1.3"}
+      {:gen_smtp, "~> 1.2 or ~> 1.3"},
+      {:oban, "~> 2.14"}
     ]
   end
 

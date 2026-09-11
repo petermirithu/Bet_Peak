@@ -1,0 +1,317 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <section
+    id="user-dashboard"
+    class="mx-auto w-full max-w-[96rem] px-4 py-6 sm:px-6 lg:px-8 lg:py-10"
+  >
+    <header class="mb-4 flex items-center justify-between border-b border-[#ded9ce] pb-4">
+      <div class="flex items-center gap-3 text-sm text-[#161616]/55">
+        <span class="grid size-9 place-items-center rounded-full bg-white shadow-sm">
+          <.icon name="hero-trophy" class="size-4 text-[#947000]" />
+        </span>
+        <div>
+          <p class="text-[0.65rem] font-bold text-[#947000]">
+            Live sportsbook
+          </p>
+          <p class="font-semibold text-[#161616]">Today's featured matches</p>
+        </div>
+      </div>
+      <.link
+        navigate={~p"/bets-history"}
+        class="flex h-10 items-center justify-center gap-2 rounded-2xl border border-[#d8d3c8] bg-white px-4 text-sm font-bold text-[#161616] transition hover:border-[#b28708] hover:text-[#735700]"
+      >
+        <.icon name="hero-ticket" class="size-4 text-[#947000]" /> History bets
+      </.link>
+    </header>
+
+    <div class="relative min-h-[31rem] overflow-hidden rounded-2xl bg-[#e8e9ed] shadow-[0_16px_50px_rgba(22,22,22,0.12)] sm:aspect-[16/7] sm:min-h-0">
+      <div class="carousel absolute inset-0 w-full">
+        <div id="slide1" class="carousel-item relative w-full">
+          <img
+            alt="Featured football promotion"
+            src={~p"/images/home_carousel/image1.jpeg"}
+            class="ml-auto h-56 w-full object-cover object-center sm:h-full sm:w-[68%]"
+          />
+          <div class="absolute bottom-4 right-4 z-20 flex gap-2">
+            <a
+              href="#slide4"
+              class="grid size-10 place-items-center rounded-full border border-white/20 bg-black/50 text-white shadow-lg backdrop-blur-md transition hover:bg-[#f4bf25] hover:text-[#161616]"
+              aria-label="Previous slide"
+            >
+              <.icon name="hero-chevron-left" class="size-4" />
+            </a>
+            <a
+              href="#slide2"
+              class="grid size-10 place-items-center rounded-full border border-white/20 bg-black/50 text-white shadow-lg backdrop-blur-md transition hover:bg-[#f4bf25] hover:text-[#161616]"
+              aria-label="Next slide"
+            >
+              <.icon name="hero-chevron-right" class="size-4" />
+            </a>
+          </div>
+          <div
+            class="absolute bottom-5 right-28 z-20 hidden justify-center gap-1.5 sm:flex"
+            aria-label="Slide 1 of 4"
+          >
+            <span class="h-1.5 w-6 rounded-full bg-[#f4bf25]"></span>
+            <span class="size-1.5 rounded-full bg-white/60"></span>
+            <span class="size-1.5 rounded-full bg-white/60"></span>
+            <span class="size-1.5 rounded-full bg-white/60"></span>
+          </div>
+        </div>
+        <div id="slide2" class="carousel-item relative w-full">
+          <img
+            alt="Featured football promotion"
+            src={~p"/images/home_carousel/image2.jpeg"}
+            class="ml-auto h-56 w-full object-cover object-center sm:h-full sm:w-[68%]"
+          />
+          <div class="absolute bottom-4 right-4 z-20 flex gap-2">
+            <a
+              href="#slide1"
+              class="grid size-10 place-items-center rounded-full border border-white/20 bg-black/50 text-white shadow-lg backdrop-blur-md transition hover:bg-[#f4bf25] hover:text-[#161616]"
+              aria-label="Previous slide"
+            >
+              <.icon name="hero-chevron-left" class="size-4" />
+            </a>
+            <a
+              href="#slide3"
+              class="grid size-10 place-items-center rounded-full border border-white/20 bg-black/50 text-white shadow-lg backdrop-blur-md transition hover:bg-[#f4bf25] hover:text-[#161616]"
+              aria-label="Next slide"
+            >
+              <.icon name="hero-chevron-right" class="size-4" />
+            </a>
+          </div>
+          <div
+            class="absolute bottom-5 right-28 z-20 hidden justify-center gap-1.5 sm:flex"
+            aria-label="Slide 2 of 4"
+          >
+            <span class="size-1.5 rounded-full bg-white/60"></span>
+            <span class="h-1.5 w-6 rounded-full bg-[#f4bf25]"></span>
+            <span class="size-1.5 rounded-full bg-white/60"></span>
+            <span class="size-1.5 rounded-full bg-white/60"></span>
+          </div>
+        </div>
+        <div id="slide3" class="carousel-item relative w-full">
+          <img
+            alt="Featured football promotion"
+            src={~p"/images/home_carousel/image3.jpeg"}
+            class="ml-auto h-56 w-full object-cover object-center sm:h-full sm:w-[68%]"
+          />
+          <div class="absolute bottom-4 right-4 z-20 flex gap-2">
+            <a
+              href="#slide2"
+              class="grid size-10 place-items-center rounded-full border border-white/20 bg-black/50 text-white shadow-lg backdrop-blur-md transition hover:bg-[#f4bf25] hover:text-[#161616]"
+              aria-label="Previous slide"
+            >
+              <.icon name="hero-chevron-left" class="size-4" />
+            </a>
+            <a
+              href="#slide4"
+              class="grid size-10 place-items-center rounded-full border border-white/20 bg-black/50 text-white shadow-lg backdrop-blur-md transition hover:bg-[#f4bf25] hover:text-[#161616]"
+              aria-label="Next slide"
+            >
+              <.icon name="hero-chevron-right" class="size-4" />
+            </a>
+          </div>
+          <div
+            class="absolute bottom-5 right-28 z-20 hidden justify-center gap-1.5 sm:flex"
+            aria-label="Slide 3 of 4"
+          >
+            <span class="size-1.5 rounded-full bg-white/60"></span>
+            <span class="size-1.5 rounded-full bg-white/60"></span>
+            <span class="h-1.5 w-6 rounded-full bg-[#f4bf25]"></span>
+            <span class="size-1.5 rounded-full bg-white/60"></span>
+          </div>
+        </div>
+        <div id="slide4" class="carousel-item relative w-full">
+          <img
+            alt="Featured football promotion"
+            src={~p"/images/home_carousel/image4.jpeg"}
+            class="ml-auto h-56 w-full object-cover object-center sm:h-full sm:w-[68%]"
+          />
+          <div class="absolute bottom-4 right-4 z-20 flex gap-2">
+            <a
+              href="#slide3"
+              class="grid size-10 place-items-center rounded-full border border-white/20 bg-black/50 text-white shadow-lg backdrop-blur-md transition hover:bg-[#f4bf25] hover:text-[#161616]"
+              aria-label="Previous slide"
+            >
+              <.icon name="hero-chevron-left" class="size-4" />
+            </a>
+            <a
+              href="#slide1"
+              class="grid size-10 place-items-center rounded-full border border-white/20 bg-black/50 text-white shadow-lg backdrop-blur-md transition hover:bg-[#f4bf25] hover:text-[#161616]"
+              aria-label="Next slide"
+            >
+              <.icon name="hero-chevron-right" class="size-4" />
+            </a>
+          </div>
+          <div
+            class="absolute bottom-5 right-28 z-20 hidden justify-center gap-1.5 sm:flex"
+            aria-label="Slide 4 of 4"
+          >
+            <span class="size-1.5 rounded-full bg-white/60"></span>
+            <span class="size-1.5 rounded-full bg-white/60"></span>
+            <span class="size-1.5 rounded-full bg-white/60"></span>
+            <span class="h-1.5 w-6 rounded-full bg-[#f4bf25]"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(0deg,#e8e9ed_0%,#e8e9ed_48%,transparent_72%)] sm:bg-[linear-gradient(90deg,#e8e9ed_0%,#e8e9ed_37%,rgba(232,233,237,0.9)_44%,transparent_68%)]">
+      </div>
+
+      <div class="pointer-events-none absolute inset-x-0 bottom-0 z-10 p-6 sm:inset-y-0 sm:right-auto sm:flex sm:w-[48%] sm:flex-col sm:justify-center sm:p-10 lg:p-12">
+        <div class="mb-4 flex items-center gap-2 text-xs font-bold text-[#161616]/55">
+          <.icon name="hero-bolt" class="size-4 text-[#b28708]" />
+          <span>Bet Peak Sportsbook</span>
+        </div>
+        <h1 class="max-w-lg text-3xl font-black leading-[1.04] text-[#090a20] sm:text-4xl lg:text-5xl">
+          Your game. <span class="block font-medium">Your moment.</span>
+        </h1>
+        <p class="mt-4 max-w-sm text-sm leading-6 text-[#090a20]/60">
+          Explore today's markets, follow the action, and back your instincts with competitive odds.
+        </p>
+        <div class="pointer-events-auto mt-6 flex flex-wrap gap-2">
+          <a
+            id="explore-games"
+            href="#featured-games"
+            class="rounded-2xl bg-[#ef1717] px-5 py-2.5 text-xs font-extrabold text-white shadow-lg shadow-red-600/20 transition hover:bg-[#ca1010]"
+          >
+            Explore games
+          </a>
+          <.link
+            navigate={~p"/bets-placed"}
+            class="rounded-2xl bg-[#090a20]/10 px-5 py-2.5 text-xs font-bold text-[#090a20]/60 transition hover:bg-[#090a20]/15 hover:text-[#090a20]"
+          >
+            View my bets
+          </.link>
+        </div>
+      </div>
+    </div>
+
+    <header class="mb-5 mt-9 flex items-end justify-between gap-4">
+      <div>
+        <h2 class="mt-1 text-2xl font-extrabold text-[#161616]">Featured fixtures</h2>
+        <p class="mt-1 text-sm text-[#161616]/50">
+          Select a fixture to place your bet.
+        </p>
+      </div>
+      <div class="hidden h-10 rounded-2xl items-center gap-2 border border-[#d8d3c8] bg-white px-4 text-sm font-semibold text-[#161616]/60 sm:flex">
+        <span class="size-2 bg-emerald-500"></span>
+        {length(@games)} markets open
+      </div>
+    </header>
+
+    <div id="featured-games" class="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+      <button
+        :for={game <- @games}
+        id={"game-#{game.id}"}
+        type="button"
+        class="group cursor-pointer overflow-hidden rounded-2xl border border-[#d8d3c8] bg-white text-left shadow-[0_8px_28px_rgba(22,22,22,0.04)] transition hover:-translate-y-0.5 hover:border-[#b28708] hover:shadow-[0_14px_35px_rgba(22,22,22,0.09)]"
+        phx-click="open_bet_modal"
+        phx-value-operation="add"
+        phx-value-game_id={game.id}
+      >
+        <div class="flex items-center justify-between border-b border-[#ece8de] px-5 py-3">
+          <div class="flex items-center gap-2 text-xs font-semibold text-[#161616]/50">
+            <.icon name="hero-calendar-days" class="size-4 text-[#947000]" />
+            {Calendar.strftime(game.starts_at, "%d %b / %H:%M")}
+          </div>
+          <span class={[
+            "inline-flex rounded-full items-center gap-1.5 px-2 py-1 text-[0.65rem] font-extrabold",
+            game.status == :live && "bg-red-50 text-red-700",
+            game.status == :scheduled && "bg-emerald-50 text-emerald-700",
+            game.status == :finished && "bg-[#eee9dc] text-[#68531a]",
+            game.status == :cancelled && "bg-gray-100 text-gray-500"
+          ]}>
+            <span class={[
+              "size-1.5",
+              game.status == :live && "animate-pulse bg-red-500",
+              game.status == :scheduled && "bg-emerald-500",
+              game.status in [:finished, :cancelled] && "bg-current opacity-50"
+            ]}></span>
+            {String.capitalize(to_string(game.status))}
+          </span>
+        </div>
+
+        <div class="px-5 py-6">
+          <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+            <div class="min-w-0 text-center">
+              <div class="mx-auto grid size-15 rounded-2xl place-items-center bg-[#161616] text-xs font-extrabold text-[#f4bf25]">
+                {game.home_team.short_form}
+              </div>
+              <p class="mt-3 truncate text-xs font-bold text-[#161616]">{game.home_team.name}</p>
+              <p class="mt-0.5 text-[0.65rem] font-semibold text-[#161616]/35">
+                Home
+              </p>
+            </div>
+            <div class="text-center">
+              <span class="text-[0.65rem] font-extrabold text-[#161616]/30">VS</span>
+            </div>
+            <div class="min-w-0 text-center">
+              <div class="mx-auto grid size-15 rounded-2xl place-items-center border-2 border-[#161616] bg-[#f4bf25] text-xs font-extrabold text-[#161616]">
+                {game.away_team.short_form}
+              </div>
+              <p class="mt-3 truncate text-xs font-bold text-[#161616]">{game.away_team.name}</p>
+              <p class="mt-0.5 text-[0.65rem] font-semibold text-[#161616]/35">
+                Away
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-6 grid grid-cols-3 gap-2">
+            <div class="rounded-2xl border border-[#ded9ce] bg-[#f8f6f0] px-3 py-2.5 text-center transition group-hover:border-[#d2bb71]">
+              <p class="text-[0.6rem] font-bold text-[#161616]/40">
+                Home
+              </p>
+              <p class="mt-1 text-base font-extrabold text-[#161616]">{game.home_odds}</p>
+            </div>
+            <div class="rounded-2xl border border-[#ded9ce] bg-[#f8f6f0] px-3 py-2.5 text-center transition group-hover:border-[#d2bb71]">
+              <p class="text-[0.6rem] font-bold text-[#161616]/40">
+                Draw
+              </p>
+              <p class="mt-1 text-base font-extrabold text-[#161616]">{game.draw_odds}</p>
+            </div>
+            <div class="rounded-2xl border border-[#ded9ce] bg-[#f8f6f0] px-3 py-2.5 text-center transition group-hover:border-[#d2bb71]">
+              <p class="text-[0.6rem] font-bold text-[#161616]/40">
+                Away
+              </p>
+              <p class="mt-1 text-base font-extrabold text-[#161616]">{game.away_odds}</p>
+            </div>
+          </div>
+
+          <div class="mt-4 flex items-center justify-between text-xs">
+            <span class="text-[#161616]/40">
+              Result:
+              <strong class="font-semibold capitalize text-[#161616]/65">{game.result}</strong>
+            </span>
+            <span class="flex items-center gap-1 font-bold text-[#735700]">
+              Place bet
+              <.icon
+                name="hero-arrow-right"
+                class="size-3.5 transition-transform group-hover:translate-x-1"
+              />
+            </span>
+          </div>
+        </div>
+      </button>
+
+      <div
+        :if={@games == []}
+        class="col-span-full rounded-2xl grid min-h-64 place-items-center border border-dashed border-[#cfc9bc] bg-white/45 px-6 text-center"
+      >
+        <div>
+          <.icon name="hero-calendar-days" class="mx-auto mb-3 size-8 text-[#161616]/20" />
+          <p class="font-bold text-[#161616]">No fixtures available</p>
+          <p class="mt-1 text-xs text-[#161616]/45">New betting markets will appear here.</p>
+        </div>
+      </div>
+    </div>
+    <.bet_modal
+      selected_game={@selected_game}
+      show_bet_modal={@show_bet_modal}
+      modal_operation={@modal_operation}
+      odds_at_placement={@odds_at_placement}
+      potential_payout={@potential_payout}
+      form={@form}
+    />
+  </section>
+</Layouts.app>

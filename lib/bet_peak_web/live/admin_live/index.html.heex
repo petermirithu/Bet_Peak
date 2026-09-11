@@ -24,9 +24,9 @@
             <p class="text-xs font-bold text-[#161616]/45">
               Total users
             </p>
-            <p class="mt-3 text-3xl font-extrabold text-[#161616]">{@stats.total}</p>
+            <p class="mt-3 text-3xl font-extrabold text-[#161616]">{@stats.users}</p>
           </div>
-          <div class="grid size-10 place-items-center bg-[#fff3c6] text-[#947000]">
+          <div class="grid size-10 place-items-center bg-violet-50 text-violet-700 rounded-full">
             <.icon name="hero-users" class="size-5" />
           </div>
         </div>
@@ -39,16 +39,16 @@
         <div class="flex items-start justify-between">
           <div>
             <p class="text-xs font-bold text-[#161616]/45">
-              Verified
+              Sports
             </p>
-            <p class="mt-3 text-3xl font-extrabold text-[#161616]">{@stats.verified}</p>
+            <p class="mt-3 text-3xl font-extrabold text-[#161616]">{@stats.sports}</p>
           </div>
-          <div class="grid size-10 place-items-center bg-emerald-50 text-emerald-700">
+          <div class="grid size-10 place-items-center bg-emerald-50 text-emerald-700 rounded-full">
             <.icon name="hero-check-badge" class="size-5" />
           </div>
         </div>
         <p class="mt-5 border-t border-[#ece8de] pt-3 text-xs text-[#161616]/45">
-          Confirmed email addresses
+          All sports in the system
         </p>
       </article>
 
@@ -56,31 +56,31 @@
         <div class="flex items-start justify-between">
           <div>
             <p class="text-xs font-bold text-[#161616]/45">
-              Administrators
+              Games
             </p>
-            <p class="mt-3 text-3xl font-extrabold text-[#161616]">{@stats.admins}</p>
+            <p class="mt-3 text-3xl font-extrabold text-[#161616]">{@stats.games}</p>
           </div>
-          <div class="grid size-10 place-items-center bg-[#161616] text-[#f4bf25]">
-            <.icon name="hero-shield-check" class="size-5" />
+          <div class="grid size-10 place-items-center bg-blue-50 text-blue-700 rounded-full">
+            <.icon name="hero-trophy" class="size-5" />
           </div>
         </div>
         <p class="mt-5 border-t border-[#ece8de] pt-3 text-xs text-[#161616]/45">
-          Accounts with admin access
+          All games in the system
         </p>
       </article>
 
       <article class="border rounded-2xl border-[#d8d3c8] bg-white p-5 shadow-[0_8px_28px_rgba(22,22,22,0.04)]">
         <div class="flex items-start justify-between">
           <div>
-            <p class="text-xs font-bold text-[#161616]/45">Pending</p>
-            <p class="mt-3 text-3xl font-extrabold text-[#161616]">{@stats.pending}</p>
+            <p class="text-xs font-bold text-[#161616]/45">Bets</p>
+            <p class="mt-3 text-3xl font-extrabold text-[#161616]">{@stats.bets}</p>
           </div>
-          <div class="grid size-10 place-items-center bg-amber-50 text-amber-700">
-            <.icon name="hero-clock" class="size-5" />
+          <div class="grid size-10 place-items-center bg-amber-50 text-amber-700 rounded-full">
+            <.icon name="hero-ticket" class="size-5" />
           </div>
         </div>
         <p class="mt-5 border-t border-[#ece8de] pt-3 text-xs text-[#161616]/45">
-          Awaiting account verification
+          All active and history bets
         </p>
       </article>
     </div>
@@ -134,6 +134,37 @@
             No accounts yet.
           </div>
         </div>
+      </section>
+
+      <section>
+        <article class="border rounded-2xl border-[#d8d3c8] bg-white p-5 shadow-[0_8px_28px_rgba(22,22,22,0.04)]">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-xs font-bold text-[#161616]/45">Profits</p>
+              <p class="mt-3 text-3xl font-extrabold text-[#161616]">KES {@stats.profits}</p>
+            </div>
+            <div class="grid size-10 place-items-center bg-green-50 text-green-700 rounded-full">
+              <.icon name="hero-arrow-trending-up" class="size-5" />
+            </div>
+          </div>
+          <p class="mt-5 border-t border-[#ece8de] pt-3 text-xs text-[#161616]/45">
+            This are profits made from game losses
+          </p>
+        </article>
+        <article class="mt-5 border rounded-2xl border-[#d8d3c8] bg-white p-5 shadow-[0_8px_28px_rgba(22,22,22,0.04)]">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-xs font-bold text-[#161616]/45">Losses</p>
+              <p class="mt-3 text-3xl font-extrabold text-[#161616]">KES {@stats.losses}</p>
+            </div>
+            <div class="grid size-10 place-items-center bg-red-50 text-red-700 rounded-full">
+              <.icon name="hero-arrow-trending-down" class="size-5" />
+            </div>
+          </div>
+          <p class="mt-5 border-t border-[#ece8de] pt-3 text-xs text-[#161616]/45">
+            This losses made from game wins
+          </p>
+        </article>
       </section>
     </div>
   </section>

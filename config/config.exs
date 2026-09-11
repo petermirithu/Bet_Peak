@@ -20,6 +20,11 @@ config :bet_peak, :scopes,
     test_setup_helper: :register_and_log_in_user
   ]
 
+config :bet_peak, Oban,
+  repo: BetPeak.Repo,
+  plugins: [Oban.Plugins.Pruner],
+  queues: [default: 10, settle_bet: 3, soft_delete: 5]
+
 config :bet_peak,
   ecto_repos: [BetPeak.Repo],
   generators: [timestamp_type: :utc_datetime]

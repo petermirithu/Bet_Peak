@@ -81,7 +81,10 @@ defmodule BetPeakWeb.AdminLive.Games do
 
   @impl true
   def handle_event("save_game", %{"game" => game_params}, socket) do
-    new_game_params = Map.put(game_params, "user_id", socket.assigns.current_scope.user.id)
+    new_game_params =
+      game_params
+      |> Map.put("user_id", socket.assigns.current_scope.user.id)
+      |> Map.put("status", :scheduled)
 
     case Games.save_game(new_game_params) do
       {:ok, _game} ->
@@ -254,7 +257,7 @@ defmodule BetPeakWeb.AdminLive.Games do
                   />
                 </div>
               </div>
-              <div>
+              <div class={if(@modal_operation == "edit", do: "", else: "sm:col-span-2")}>
                 <.input
                   field={@form[:starts_at]}
                   type="datetime-local"
@@ -265,7 +268,25 @@ defmodule BetPeakWeb.AdminLive.Games do
                   error_class="border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15"
                 />
               </div>
-              <div>
+              <div :if={@modal_operation == "edit"}>
+                <.input
+                  field={@form[:result]}
+                  type="select"
+                  label="Select Game Result"
+                  options={[
+                    Pending: "pending",
+                    "Home Team Won": "home",
+                    "Away Team Won": "away",
+                    "Teams Drew": "draw"
+                  ]}
+                  spellcheck="false"
+                  required="false"
+                  class="h-12 select rounded-2xl w-full border border-[#d7d2c7] bg-white px-4 text-[#161616] outline-none transition placeholder:text-[#161616]/30 focus:border-[#b28708] focus:ring-2 focus:ring-[#f4bf25]/20"
+                  error_class="border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15"
+                />
+              </div>
+
+              <div :if={@modal_operation == "edit"} class="sm:col-span-2">
                 <.input
                   field={@form[:status]}
                   type="select"
@@ -278,25 +299,6 @@ defmodule BetPeakWeb.AdminLive.Games do
                   ]}
                   spellcheck="false"
                   required
-                  class="h-12 select rounded-2xl w-full border border-[#d7d2c7] bg-white px-4 text-[#161616] outline-none transition placeholder:text-[#161616]/30 focus:border-[#b28708] focus:ring-2 focus:ring-[#f4bf25]/20"
-                  error_class="border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15"
-                />
-              </div>
-
-              <div :if={@modal_operation == "edit"} class="sm:col-span-2">
-                <.input
-                  field={@form[:result]}
-                  type="select"
-                  label="Select Game Result"
-                  options={[
-                    Pending: "pending",
-                    "Home Team Won": "home",
-                    "Away Team Won": "away",
-                    "Teams Drew": "draw",
-                    "No Team Score": "nil_until_end"
-                  ]}
-                  spellcheck="false"
-                  required="false"
                   class="h-12 select rounded-2xl w-full border border-[#d7d2c7] bg-white px-4 text-[#161616] outline-none transition placeholder:text-[#161616]/30 focus:border-[#b28708] focus:ring-2 focus:ring-[#f4bf25]/20"
                   error_class="border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15"
                 />
