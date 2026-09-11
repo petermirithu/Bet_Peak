@@ -1,5 +1,5 @@
-defmodule BetPeak.BetSettlement.SettleBetWorker do
-  use Oban.Worker, queue: :bet_settlements, max_attempts: 3
+defmodule BetPeak.Workers.SettleBet do
+  use Oban.Worker, queue: :settle_bet, max_attempts: 3
 
   alias BetPeak.Bets
 

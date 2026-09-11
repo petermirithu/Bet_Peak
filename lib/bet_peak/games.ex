@@ -4,24 +4,29 @@ defmodule BetPeak.Games do
 
   alias BetPeak.Games.Game
   alias BetPeak.Bets
+  alias BetPeak.Workers
 
   def fetch_all() do
-    Game
+    from(game in Game, where: is_nil(game.deleted_at))
     |> Repo.all()
     |> Repo.preload(:home_team)
     |> Repo.preload(:away_team)
   end
 
   def fetch_active() do
-    query = from game in Game, where: game.status in [:scheduled, :live]
-
-    Repo.all(query)
+    from(game in Game, where: is_nil(game.deleted_at) and game.status in [:scheduled, :live])
+    |> Repo.all()
     |> Repo.preload(:home_team)
     |> Repo.preload(:away_team)
   end
 
   def get_game(id) do
-    Repo.get_by(Game, id: id)
+    from(
+      game in Game,
+      where: is_nil(game.deleted_at) and game.id == ^id,
+      limit: 1
+    )
+    |> Repo.one()
   end
 
   def save_game(attrs) do
@@ -56,6 +61,19 @@ defmodule BetPeak.Games do
   end
 
   def delete_game(game) do
-    Repo.delete(game)
+    game
+    |> Ecto.Changeset.change(%{deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
+    |> Repo.update()
+    |> case do
+      {:ok, updated_game} ->
+        %{table: "bets", id: updated_game.id}
+        |> Workers.SoftDelete.new()
+        |> Oban.insert()
+
+        {:ok, updated_game}
+
+      {:error, changeset} ->
+        {:error, changeset}
+    end
   end
 end

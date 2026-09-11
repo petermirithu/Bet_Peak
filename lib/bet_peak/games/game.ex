@@ -13,6 +13,8 @@ defmodule BetPeak.Games.Game do
       values: [:pending, :home, :away, :draw],
       default: :pending
 
+    field :deleted_at, :utc_datetime
+
     belongs_to :user, BetPeak.Accounts.User
     belongs_to :home_team, BetPeak.Teams.Team, foreign_key: :home_team_id
     belongs_to :away_team, BetPeak.Teams.Team, foreign_key: :away_team_id

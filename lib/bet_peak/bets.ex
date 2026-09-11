@@ -4,7 +4,7 @@ defmodule BetPeak.Bets do
   alias BetPeak.Repo
   alias BetPeak.Bets.Bet
   alias BetPeak.Bets.BetNotifier
-  alias BetPeak.BetSettlement.SettleBetWorker
+  alias BetPeak.Workers
   alias Oban
 
   def fetch_all() do
@@ -116,7 +116,7 @@ defmodule BetPeak.Bets do
             true -> 3
           end
 
-        SettleBetWorker.new(
+        Workers.SettleBet.new(
           %{bet_id: bet.id, game_result: game_result},
           priority: oban_priority
         )
@@ -151,5 +151,10 @@ defmodule BetPeak.Bets do
     bet
     |> Ecto.Changeset.change(%{deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
     |> Repo.update()
+  end
+
+  def delete_game_bets(game_id) do
+    from(bet in Bet, where: bet.game_id == ^game_id and is_nil(bet.deleted_at))
+    |> Repo.update_all(set: [deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)])
   end
 end
