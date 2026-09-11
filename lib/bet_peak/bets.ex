@@ -84,6 +84,8 @@ defmodule BetPeak.Bets do
           select: max(bet.stake_amount)
       ) || 0
 
+    IO.inspect("===== stake max amount is.......#{max_stake_amount}")
+
     query =
       from(
         bet in Bet,
@@ -155,6 +157,11 @@ defmodule BetPeak.Bets do
 
   def delete_many_by_game_id(game_id) do
     from(bet in Bet, where: bet.game_id == ^game_id and is_nil(bet.deleted_at))
+    |> Repo.update_all(set: [deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)])
+  end
+
+  def delete_many_by_user_id(user_id) do
+    from(bet in Bet, where: bet.user_id == ^user_id and is_nil(bet.deleted_at))
     |> Repo.update_all(set: [deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)])
   end
 end

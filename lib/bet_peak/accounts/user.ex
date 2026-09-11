@@ -13,6 +13,7 @@ defmodule BetPeak.Accounts.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
+    field :deleted_at, :utc_datetime
 
     has_many :sports, BetPeak.Sports.Sport
     has_many :teams, BetPeak.Teams.Team
@@ -59,17 +60,6 @@ defmodule BetPeak.Accounts.User do
     update_change(changeset, :last_name, &String.trim/1)
   end
 
-  @doc """
-  A user changeset for registering or changing the email.
-
-  It requires the email to change otherwise an error is added.
-
-  ## Options
-
-    * `:validate_unique` - Set to false if you don't want to validate the
-      uniqueness of the email, useful when displaying live validations.
-      Defaults to `true`.
-  """
   def email_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:email])
@@ -103,21 +93,6 @@ defmodule BetPeak.Accounts.User do
     end
   end
 
-  @doc """
-  A user changeset for changing the password.
-
-  It is important to validate the length of the password, as long passwords may
-  be very expensive to hash for certain algorithms.
-
-  ## Options
-
-    * `:hash_password` - Hashes the password so it can be stored securely
-      in the database and ensures the password field is cleared to prevent
-      leaks in the logs. If password hashing is not needed and clearing the
-      password field is not desired (like when using this changeset for
-      validations on a LiveView form), this option can be set to `false`.
-      Defaults to `true`.
-  """
   def password_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:password])
@@ -154,20 +129,11 @@ defmodule BetPeak.Accounts.User do
     end
   end
 
-  @doc """
-  Confirms the account by setting `confirmed_at`.
-  """
   def confirm_changeset(user) do
     now = DateTime.utc_now(:second)
     change(user, confirmed_at: now)
   end
 
-  @doc """
-  Verifies the password.
-
-  If there is no user or the user doesn't have a password, we call
-  `Bcrypt.no_user_verify/0` to avoid timing attacks.
-  """
   def valid_password?(%BetPeak.Accounts.User{hashed_password: hashed_password}, password)
       when is_binary(hashed_password) and byte_size(password) > 0 do
     Bcrypt.verify_pass(password, hashed_password)

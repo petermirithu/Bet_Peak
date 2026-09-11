@@ -31,7 +31,7 @@ defmodule BetPeak.Teams do
     team
     |> Ecto.Changeset.change(%{deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
     |> Repo.update()
-    |> Workers.SoftDelete.delete_children_records("games")
+    |> Workers.SoftDelete.delete_children_records("team_games")
   end
 
   def delete_many_by_sport_id(sport_id) do
@@ -46,7 +46,7 @@ defmodule BetPeak.Teams do
     |> Repo.all()
     |> soft_delete_teams(query)
     |> Enum.each(fn team ->
-      Workers.SoftDelete.delete_children_records({:ok, team}, "games")
+      Workers.SoftDelete.delete_children_records({:ok, team}, "team_games")
     end)
   end
 

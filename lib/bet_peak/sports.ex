@@ -30,6 +30,6 @@ defmodule BetPeak.Sports do
     sport
     |> Ecto.Changeset.change(%{deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
     |> Repo.update()
-    |> Workers.SoftDelete.delete_children_records("teams")
+    |> Workers.SoftDelete.delete_children_records("sport_teams")
   end
 end

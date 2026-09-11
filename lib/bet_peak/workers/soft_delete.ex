@@ -6,25 +6,31 @@ defmodule BetPeak.Workers.SoftDelete do
   alias BetPeak.Teams
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{"table" => table, "id" => id}}) do
-    case table do
-      "bets" ->
+  def perform(%Oban.Job{args: %{"relationship" => relationship, "id" => id}}) do
+    case relationship do
+      "game_bets" ->
         Bets.delete_many_by_game_id(id)
 
-      "games" ->
+      "user_bets" ->
+        Bets.delete_many_by_user_id(id)
+
+      "team_games" ->
         Games.delete_many_by_team_id(id)
 
-      "teams" ->
+      "sport_teams" ->
         Teams.delete_many_by_sport_id(id)
     end
 
     :ok
   end
 
-  def delete_children_records(changeset, table) do
+  def delete_children_records(changeset, relationship) do
     case changeset do
       {:ok, updated_record} ->
-        %{table: table, id: updated_record.id}
+        %{
+          relationship: relationship,
+          id: updated_record.id
+        }
         |> __MODULE__.new()
         |> Oban.insert()
 
