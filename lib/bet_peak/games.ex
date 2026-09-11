@@ -67,7 +67,7 @@ defmodule BetPeak.Games do
     |> Workers.SoftDelete.delete_children_records("bets")
   end
 
-  def delete_games_by_team_id(team_id) do
+  def delete_many_by_team_id(team_id) do
     query =
       from(game in Game,
         where:

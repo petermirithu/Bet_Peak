@@ -3,15 +3,19 @@ defmodule BetPeak.Workers.SoftDelete do
 
   alias BetPeak.Bets
   alias BetPeak.Games
+  alias BetPeak.Teams
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"table" => table, "id" => id}}) do
     case table do
       "bets" ->
-        Bets.delete_bets_by_game_id(id)
+        Bets.delete_many_by_game_id(id)
 
       "games" ->
-        Games.delete_games_by_team_id(id)
+        Games.delete_many_by_team_id(id)
+
+      "teams" ->
+        Teams.delete_many_by_sport_id(id)
     end
 
     :ok

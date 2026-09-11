@@ -33,4 +33,25 @@ defmodule BetPeak.Teams do
     |> Repo.update()
     |> Workers.SoftDelete.delete_children_records("games")
   end
+
+  def delete_many_by_sport_id(sport_id) do
+    query =
+      from(team in Team,
+        where:
+          team.sport_id == ^sport_id and
+            is_nil(team.deleted_at)
+      )
+
+    query
+    |> Repo.all()
+    |> soft_delete_teams(query)
+    |> Enum.each(fn team ->
+      Workers.SoftDelete.delete_children_records({:ok, team}, "games")
+    end)
+  end
+
+  defp soft_delete_teams(teams, query) do
+    Repo.update_all(query, set: [deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)])
+    teams
+  end
 end

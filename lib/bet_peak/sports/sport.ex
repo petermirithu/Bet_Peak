@@ -7,9 +7,10 @@ defmodule BetPeak.Sports.Sport do
     field :description, :string
     field :active, :boolean, default: true
     field :slug, :string
+    field :deleted_at, :utc_datetime
 
     belongs_to :user, BetPeak.Accounts.User
-    has_many :teams, BetPeak.Teams.Team
+    has_many :team, BetPeak.Teams.Team
 
     timestamps(type: :utc_datetime)
   end
