@@ -75,7 +75,7 @@ defmodule BetPeakWeb.AdminLive.Sports do
   def handle_event("save_sport", %{"sport" => sport_params}, socket) do
     new_sport_params = Map.put(sport_params, "user_id", socket.assigns.current_scope.user.id)
 
-    case Sports.save_sport(new_sport_params) do
+    case Sports.save_sport(socket.assigns.current_scope, new_sport_params) do
       {:ok, _sport} ->
         {:noreply,
          socket
@@ -84,7 +84,17 @@ defmodule BetPeakWeb.AdminLive.Sports do
          |> assign(show_sport_modal: false)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_form(socket, changeset)}
+        {:noreply,
+         socket
+         |> assign_form(changeset)
+         |> put_flash(:error, "Oops! Something went wrong while deleting the user.")
+         |> assign(show_user_modal: false)}
+
+      {:error, :not_authorized} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "You are not authorized to add a sport!")
+         |> assign(show_sport_modal: false)}
     end
   end
 

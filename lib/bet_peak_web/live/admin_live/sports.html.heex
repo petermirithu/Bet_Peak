@@ -18,6 +18,7 @@
           <.icon name="hero-play" class="size-4 text-[#947000]" /> {length(@sports)} Created
         </div>
         <.button
+          :if={@current_scope.user.is_superuser == true}
           class="btn btn-primary h-10 items-center gap-2 rounded-2xl px-4 text-sm font-semibold text-white"
           phx-click="open_sport_modal"
           phx-value-operation="add"
@@ -38,7 +39,9 @@
               <th>Slug</th>
               <th>Active</th>
               <th>Created</th>
-              <th><span class="sr-only">Actions</span></th>
+              <th :if={@current_scope.user.is_superuser == true}>
+                <span class="sr-only">Actions</span>
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-[#ece8de]">
@@ -57,7 +60,7 @@
               <td class="whitespace-nowrap text-xs text-[#161616]/50">
                 {Helpers.format_date(sport.inserted_at)}
               </td>
-              <td>
+              <td :if={@current_scope.user.is_superuser == true}>
                 <.button
                   class="btn btn-circle btn-secondary transition-transform group-hover:translate-y-1 mr-2"
                   phx-click="open_sport_modal"

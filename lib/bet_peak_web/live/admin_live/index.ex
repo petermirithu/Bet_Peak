@@ -9,7 +9,7 @@ defmodule BetPeakWeb.AdminLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    users = Accounts.get_all_users()
+    users = Accounts.get_all_users(socket.assigns.current_scope)
     bets = Bets.fetch_all()
 
     bet_stats =
