@@ -7,7 +7,7 @@ defmodule BetPeakWeb.AdminLive.Users do
 
   @impl true
   def mount(_params, _session, socket) do
-    users = Accounts.get_all_users()
+    users = Accounts.get_all_users(socket.assigns.current_scope)
 
     {:ok,
      socket
@@ -75,7 +75,7 @@ defmodule BetPeakWeb.AdminLive.Users do
          |> assign_form(Accounts.change_user_access(user))
          |> assign(show_user_modal: false)
          |> assign(modal_operation: "account_info")
-         |> assign(users: Accounts.get_all_users())
+         |> assign(users: Accounts.get_all_users(socket.assigns.current_scope))
          |> assign(selected_user: user)
          |> put_flash(:info, "User access updated successfully.")}
 
@@ -90,18 +90,24 @@ defmodule BetPeakWeb.AdminLive.Users do
 
   @impl true
   def handle_event("delete_user", _params, socket) do
-    case Accounts.delete_user(socket.assigns.selected_user) do
+    case Accounts.delete_user(socket.assigns.current_scope, socket.assigns.selected_user) do
       {:ok, _user} ->
         {:noreply,
          socket
-         |> assign(users: Accounts.get_all_users())
+         |> assign(users: Accounts.get_all_users(socket.assigns.current_scope))
          |> put_flash(:info, "Successfully deleted the user")
          |> assign(show_user_modal: false)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Oops! Something went wrong while deleting the user.")
+         |> put_flash(:error, "Oops! Something went wrong while deleting the user.")
+         |> assign(show_user_modal: false)}
+
+      {:error, :not_authorized} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "You are not authorized to delete a user!")
          |> assign(show_user_modal: false)}
     end
   end
@@ -412,6 +418,12 @@ defmodule BetPeakWeb.AdminLive.Users do
                 </fieldset>
               </div>
 
+              <p
+                :if={@current_scope.user.is_superuser == false}
+                class="text-sm text-red-400 text-center"
+              >
+                You are not allowed to edit user access!
+              </p>
               <div class="flex justify-end border-t border-[#ded9ce] pt-5">
                 <.button
                   disabled={can_elevate_user(@current_scope, @selected_user)}

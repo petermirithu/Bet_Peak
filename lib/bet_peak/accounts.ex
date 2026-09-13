@@ -2,13 +2,21 @@ defmodule BetPeak.Accounts do
   import Ecto.Query, warn: false
   alias BetPeak.Workers
   alias BetPeak.Repo
+  alias BetPeak.Accounts.Scope
+  alias BetPeak.Guards
 
   alias BetPeak.Accounts.{User, UserToken, UserNotifier}
 
   ## Database getters
-  def get_all_users() do
-    from(user in User, where: is_nil(user.deleted_at))
-    |> Repo.all()
+  def get_all_users(%Scope{} = scope) do
+    case Guards.require_super_admin(false, scope.user) do
+      :authorized ->
+        from(user in User, where: is_nil(user.deleted_at))
+        |> Repo.all()
+
+      :unauthorized ->
+        []
+    end
   end
 
   def get_user_by_email(email) when is_binary(email) do
@@ -169,17 +177,25 @@ defmodule BetPeak.Accounts do
     end)
   end
 
-  def delete_user(user) do
+  def delete_user(%Scope{} = scope, user) do
     # For admins, we dont want to delete sports, teams and games added by them.
-    changeset =
-      user
-      |> Ecto.Changeset.change(%{deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
-      |> Repo.update()
-      |> Workers.SoftDelete.delete_children_records("user_bets")
+    case Guards.require_super_admin(false, scope.user) do
+      :authorized ->
+        changeset =
+          user
+          |> Ecto.Changeset.change(%{
+            deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)
+          })
+          |> Repo.update()
+          |> Workers.SoftDelete.delete_children_records("user_bets")
 
-    from(token in UserToken, where: token.user_id == ^user.id)
-    |> Repo.delete_all()
+        from(token in UserToken, where: token.user_id == ^user.id)
+        |> Repo.delete_all()
 
-    changeset
+        changeset
+
+      :unauthorized ->
+        {:error, :not_authorized}
+    end
   end
 end

@@ -1,11 +1,8 @@
 defmodule BetPeak.Bets.BetNotifier do
-  import Swoosh.Email
-
-  alias Swoosh.Mailer
-  alias BetPeak.Mailer
+  alias BetPeak.Workers.SendMail
 
   def send_bet_won_email(bet) do
-    deliver(bet.user.email, "You won a bet!", """
+    SendMail.create_mail_job(bet.user.email, "You won a bet!", """
       Hello #{bet.user.first_name},
 
       Congratulations! You just won a bet.
@@ -25,7 +22,7 @@ defmodule BetPeak.Bets.BetNotifier do
   end
 
   def send_bet_lost_email(bet) do
-    deliver(bet.user.email, "You lost a bet!", """
+    SendMail.create_mail_job(bet.user.email, "You lost a bet!", """
       Hello #{bet.user.first_name},
 
       Oooh no! You just lost a bet.
@@ -42,21 +39,5 @@ defmodule BetPeak.Bets.BetNotifier do
       Warm regards,
       Bet Peak Team
     """)
-  end
-
-  defp deliver(recipient, subject, body) do
-    email =
-      new()
-      |> to(recipient)
-      |> from({"BetPeak", System.get_env("GMAIL_USER")})
-      |> subject(subject)
-      |> text_body(body)
-
-    with {:ok, _metadata} <- Mailer.deliver(email) do
-      {:ok, email}
-    else
-      {:error, reason} ->
-        {:error, reason}
-    end
   end
 end

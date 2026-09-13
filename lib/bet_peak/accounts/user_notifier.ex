@@ -1,31 +1,9 @@
 defmodule BetPeak.Accounts.UserNotifier do
-  import Swoosh.Email
-
-  alias BetPeak.Mailer
   alias BetPeak.Accounts.User
+  alias BetPeak.Workers.SendMail
 
-  # Delivers the email using the application mailer.
-  defp deliver(recipient, subject, body) do
-    email =
-      new()
-      |> to(recipient)
-      |> from({"BetPeak", System.get_env("GMAIL_USER")})
-      |> subject(subject)
-      |> text_body(body)
-
-    with {:ok, _metadata} <- Mailer.deliver(email) do
-      {:ok, email}
-    else
-      {:error, reason} ->
-        {:error, reason}
-    end
-  end
-
-  @doc """
-  Deliver instructions to update a user email.
-  """
   def deliver_update_email_instructions(user, url) do
-    deliver(user.email, "Update email instructions", """
+    SendMail.create_mail_job(user.email, "Update email instructions", """
     Hi #{user.email},
 
     You can change your email by visiting the URL below:
@@ -39,9 +17,6 @@ defmodule BetPeak.Accounts.UserNotifier do
     """)
   end
 
-  @doc """
-  Deliver instructions to log in with a magic link.
-  """
   def deliver_login_instructions(user, url) do
     case user do
       %User{confirmed_at: nil} -> deliver_confirmation_instructions(user, url)
@@ -50,7 +25,7 @@ defmodule BetPeak.Accounts.UserNotifier do
   end
 
   defp deliver_magic_link_instructions(user, url) do
-    deliver(user.email, "Log in instructions", """
+    SendMail.create_mail_job(user.email, "Log in instructions", """
     Hi #{user.email},
 
     You can log into your account by visiting the URL below:
@@ -65,7 +40,7 @@ defmodule BetPeak.Accounts.UserNotifier do
   end
 
   defp deliver_confirmation_instructions(user, url) do
-    deliver(user.email, "Confirmation instructions", """
+    SendMail.create_mail_job(user.email, "Confirmation instructions", """
     Hi #{user.email},
 
     You can confirm your account by visiting the URL below:

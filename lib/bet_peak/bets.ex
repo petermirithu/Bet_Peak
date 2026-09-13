@@ -13,8 +13,10 @@ defmodule BetPeak.Bets do
   end
 
   def fetch_active(user_id) do
-    from(bet in Bet, where: is_nil(bet.deleted_at))
-    |> Repo.all_by(status: :pending, user_id: user_id)
+    from(bet in Bet,
+      where: is_nil(bet.deleted_at) and bet.status == :pending and bet.user_id == ^user_id
+    )
+    |> Repo.all()
     |> Repo.preload(:game)
     |> Repo.preload(game: :home_team, game: :away_team)
   end
@@ -84,8 +86,6 @@ defmodule BetPeak.Bets do
           select: max(bet.stake_amount)
       ) || 0
 
-    IO.inspect("===== stake max amount is.......#{max_stake_amount}")
-
     query =
       from(
         bet in Bet,
@@ -129,6 +129,7 @@ defmodule BetPeak.Bets do
   def settle_bet_and_send_mail(bet_id, game_result) do
     bet =
       from(bet in Bet, where: is_nil(bet.deleted_at) and bet.id == ^bet_id)
+      |> Repo.one()
       |> Repo.preload(:user)
       |> Repo.preload(:game)
       |> Repo.preload(game: :home_team)

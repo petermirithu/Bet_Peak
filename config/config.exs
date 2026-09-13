@@ -23,7 +23,7 @@ config :bet_peak, :scopes,
 config :bet_peak, Oban,
   repo: BetPeak.Repo,
   plugins: [Oban.Plugins.Pruner],
-  queues: [default: 10, settle_bet: 3, soft_delete: 5]
+  queues: [default: 10, settle_bet: 3, soft_delete: 5, send_mail: 20]
 
 config :bet_peak,
   ecto_repos: [BetPeak.Repo],
