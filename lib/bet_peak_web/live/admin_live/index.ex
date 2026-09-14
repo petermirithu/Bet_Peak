@@ -15,10 +15,10 @@ defmodule BetPeakWeb.AdminLive.Index do
     bet_stats =
       Enum.reduce(bets, %{profits: 0, losses: 0}, fn bet, acc ->
         case bet.status do
-          :won ->
+          :lost ->
             Map.put(acc, :profits, Decimal.add(acc.profits, bet.potential_payout))
 
-          :lost ->
+          :won ->
             Map.put(acc, :losses, Decimal.add(acc.losses, bet.potential_payout))
 
           _ ->
