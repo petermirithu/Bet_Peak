@@ -128,7 +128,10 @@ defmodule BetPeakWeb.BetLive.Index do
          |> assign(show_bet_modal: false)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_form(socket, changeset)}
+        render_default_form_error(socket, changeset, "saving")
+
+      {:error, _} ->
+        render_default_form_error(socket, nil, "saving")
     end
   end
 
@@ -145,7 +148,10 @@ defmodule BetPeakWeb.BetLive.Index do
          |> assign(show_bet_modal: false)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_form(socket, changeset)}
+        render_default_form_error(socket, changeset, "updating")
+
+      {:error, _} ->
+        render_default_form_error(socket, nil, "updating")
     end
   end
 
@@ -160,9 +166,32 @@ defmodule BetPeakWeb.BetLive.Index do
          |> assign(show_bet_modal: false)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
+        render_default_form_error(socket, changeset, "deleting")
+
+      {:error, _} ->
+        render_default_form_error(socket, nil, "deleting")
+    end
+  end
+
+  defp render_default_form_error(socket, changeset, operation) do
+    case changeset do
+      nil ->
         {:noreply,
          socket
-         |> put_flash(:info, "Oops! Something went wrong while deleting the bet.")
+         |> put_flash(
+           :error,
+           "Oops! Something went wrong while #{operation} the bet. Try again later."
+         )
+         |> assign(show_bet_modal: false)}
+
+      _ ->
+        {:noreply,
+         socket
+         |> assign_form(changeset)
+         |> put_flash(
+           :error,
+           "Oops! Something went wrong while #{operation} the bet. Try again later."
+         )
          |> assign(show_bet_modal: false)}
     end
   end

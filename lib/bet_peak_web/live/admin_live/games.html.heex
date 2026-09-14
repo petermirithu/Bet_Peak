@@ -63,8 +63,31 @@
               <td class="whitespace-nowrap text-xs text-[#161616]/65">{game.home_odds}</td>
               <td class="whitespace-nowrap text-xs text-[#161616]/65">{game.draw_odds}</td>
               <td class="whitespace-nowrap text-xs text-[#161616]/65">{game.away_odds}</td>
-              <td class="whitespace-nowrap text-xs text-[#161616]/65">{game.status}</td>
-              <td class="whitespace-nowrap text-xs text-[#161616]/65">{game.result}</td>
+              <td class="whitespace-nowrap text-xs text-[#161616]/65 capitalize">
+                <span
+                  :if={game.status == :scheduled}
+                  class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-700"
+                >
+                  <span class="size-1.5 bg-gray-500 rounded-2xl"></span> {game.status}
+                </span>
+
+                <span
+                  :if={game.status == :live}
+                  class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-500"
+                >
+                  <span class="size-1.5 bg-blue-400 rounded-2xl"></span> {game.status}
+                </span>
+
+                <span
+                  :if={game.status == :finished}
+                  class="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700"
+                >
+                  <span class="size-1.5 bg-green-500 rounded-2xl"></span> {game.status}
+                </span>
+              </td>
+              <td class="whitespace-nowrap text-xs text-[#161616]/65 capitalize">
+                <span class="badge badge-sm badge-outline badge-accent">{game.result}</span>
+              </td>
               <td class="whitespace-nowrap text-xs text-[#161616]/50">
                 {Helpers.format_date(game.inserted_at)}
               </td>

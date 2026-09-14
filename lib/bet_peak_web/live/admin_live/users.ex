@@ -79,8 +79,11 @@ defmodule BetPeakWeb.AdminLive.Users do
          |> assign(selected_user: user)
          |> put_flash(:info, "User access updated successfully.")}
 
-      {:error, changeset} ->
-        {:noreply, assign_form(socket, changeset)}
+      {:error, %Ecto.Changeset{} = changeset} ->
+        render_default_form_error(socket, changeset, "updating")
+
+      {:error, _} ->
+        render_default_form_error(socket, nil, "updating")
     end
   end
 
@@ -99,15 +102,38 @@ defmodule BetPeakWeb.AdminLive.Users do
          |> assign(show_user_modal: false)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply,
-         socket
-         |> put_flash(:error, "Oops! Something went wrong while deleting the user.")
-         |> assign(show_user_modal: false)}
+        render_default_form_error(socket, changeset, "deleting")
 
       {:error, :not_authorized} ->
         {:noreply,
          socket
          |> put_flash(:error, "You are not authorized to delete a user!")
+         |> assign(show_user_modal: false)}
+
+      {:error, _} ->
+        render_default_form_error(socket, nil, "deleting")
+    end
+  end
+
+  defp render_default_form_error(socket, changeset, operation) do
+    case changeset do
+      nil ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           "Oops! Something went wrong while #{operation} the user. Try again later."
+         )
+         |> assign(show_user_modal: false)}
+
+      _ ->
+        {:noreply,
+         socket
+         |> assign_form(changeset)
+         |> put_flash(
+           :error,
+           "Oops! Something went wrong while #{operation} the user. Try again later."
+         )
          |> assign(show_user_modal: false)}
     end
   end
@@ -251,7 +277,6 @@ defmodule BetPeakWeb.AdminLive.Users do
                       <th>Potential Payout</th>
                       <th>Status</th>
                       <th>Place At</th>
-                      <th>Matured At</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-[#ece8de]">
@@ -267,7 +292,9 @@ defmodule BetPeakWeb.AdminLive.Users do
                           {bet.game.home_team.short_form} VS {bet.game.away_team.short_form}
                         </p>
                       </td>
-                      <td class="text-xs text-[#161616]/65">{bet.selection}</td>
+                      <td class="text-xs text-[#161616]/65">
+                        <span class="badge badge-xs badge-accent badge-outline capitalize">{bet.selection}</span>
+                      </td>
                       <td class="whitespace-nowrap text-xs text-[#161616]/65">
                         KES {bet.stake_amount}
                       </td>
@@ -277,17 +304,30 @@ defmodule BetPeakWeb.AdminLive.Users do
                       <td class="whitespace-nowrap text-xs text-[#161616]/65">
                         KES {bet.potential_payout}
                       </td>
-                      <td class="whitespace-nowrap text-xs text-[#161616]/65">{bet.status}</td>
-                      <td class="whitespace-nowrap text-xs text-[#161616]/50">
-                        {Helpers.format_date(bet.inserted_at)}
+                      <td class="whitespace-nowrap text-xs text-[#161616]/65 capitalize">
+                        <span
+                          :if={bet.status == :pending}
+                          class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-700"
+                        >
+                          <span class="size-1.5 bg-gray-500 rounded-2xl"></span> {bet.status}
+                        </span>
+
+                        <span
+                          :if={bet.status == :won}
+                          class="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700"
+                        >
+                          <span class="size-1.5 bg-green-500 rounded-2xl"></span> {bet.status}
+                        </span>
+
+                        <span
+                          :if={bet.status == :lost}
+                          class="inline-flex items-center gap-1.5 text-xs font-semibold text-red-700"
+                        >
+                          <span class="size-1.5 bg-red-500 rounded-2xl"></span> {bet.status}
+                        </span>
                       </td>
                       <td class="whitespace-nowrap text-xs text-[#161616]/50">
-                        <span :if={bet.status == :pending}>
-                          -
-                        </span>
-                        <span :if={bet.status != :pending}>
-                          {Helpers.format_date(bet.updated_at)}
-                        </span>
+                        {Helpers.format_date(bet.inserted_at)}
                       </td>
                     </tr>
                   </tbody>

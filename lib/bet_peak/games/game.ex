@@ -70,12 +70,17 @@ defmodule BetPeak.Games.Game do
 
   defp validate_home_away_team(changeset) do
     home_team_id = get_field(changeset, :home_team_id)
-    away_team_id = get_field(changeset, :away_team_id)
 
-    if home_team_id && away_team_id && home_team_id == away_team_id do
-      add_error(changeset, :away_team_id, "Home team and away team cannot be the same team.")
-    else
-      changeset
+    case get_field(changeset, :away_team_id) do
+      ^home_team_id when not is_nil(home_team_id) ->
+        add_error(
+          changeset,
+          :away_team_id,
+          "Home team and away team cannot be the same team."
+        )
+
+      _ ->
+        changeset
     end
   end
 
