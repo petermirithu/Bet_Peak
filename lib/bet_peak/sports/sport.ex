@@ -20,16 +20,14 @@ defmodule BetPeak.Sports.Sport do
     sport
     |> cast(attrs, [:name, :description, :active, :user_id])
     |> validate_required([:name, :description, :active, :user_id])
-    |> validate_length(:name, min: 2)
-    |> validate_length(:description, min: 10)
+    |> validate_length(:name, min: 2, max: 50)
     |> unique_constraint(:name)
+    |> validate_length(:description, min: 10, max: 200)
     |> generate_slug()
   end
 
   defp generate_slug(changeset) do
-    if changeset.valid? do
-      name = get_change(changeset, :name) || get_field(changeset, :name)
-
+    with name when changeset.valid? <- get_change(changeset, :name) || get_field(changeset, :name) do
       slug =
         name
         |> String.downcase()
@@ -37,7 +35,8 @@ defmodule BetPeak.Sports.Sport do
 
       put_change(changeset, :slug, slug)
     else
-      changeset
+      _ ->
+        changeset
     end
   end
 end

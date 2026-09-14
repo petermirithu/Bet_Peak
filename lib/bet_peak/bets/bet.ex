@@ -45,33 +45,34 @@ defmodule BetPeak.Bets.Bet do
   end
 
   defp add_odds_at_placement(changeset) do
-    selection = get_field(changeset, :selection)
-
-    if selection do
-      game = Games.get_game(get_field(changeset, :game_id))
-
+    with selection when selection in [:home, :draw, :away] <- get_field(changeset, :selection),
+         game_id when is_integer(game_id) <- get_field(changeset, :game_id),
+         %{} = game <- Games.get_game(game_id) do
       put_change(
         changeset,
         :odds_at_placement,
-        Map.get(game, String.to_atom("#{selection}_odds"), 0.0)
+        odds_for(game, selection)
       )
     else
-      changeset
+      _ -> changeset
     end
   end
 
-  defp calculate_potential_payout(changeset) do
-    stake_amount = get_field(changeset, :stake_amount)
-    odds_at_placement = get_field(changeset, :odds_at_placement)
+  defp odds_for(%{home_odds: odds}, :home), do: odds
+  defp odds_for(%{draw_odds: odds}, :draw), do: odds
+  defp odds_for(%{away_odds: odds}, :away), do: odds
 
-    if stake_amount do
-      put_change(
-        changeset,
-        :potential_payout,
-        Decimal.mult(stake_amount, odds_at_placement)
-      )
-    else
-      changeset
+  defp calculate_potential_payout(changeset) do
+    stake = get_field(changeset, :stake_amount)
+    odds = get_field(changeset, :odds_at_placement)
+
+    case {stake, odds} do
+      {%Decimal{} = stake, %Decimal{} = odds} ->
+        payout = Decimal.mult(stake, odds)
+        put_change(changeset, :potential_payout, payout)
+
+      _ ->
+        changeset
     end
   end
 end
