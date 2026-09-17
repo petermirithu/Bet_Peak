@@ -119,7 +119,7 @@ defmodule BetPeakWeb.AdminLive.AccessControl do
         {:noreply, socket |> put_flash(:error, "You are not authorized to add a role!")}
 
       {:error, _} ->
-        render_default_form_error(socket, nil, "adding", "role")
+        render_default_form_error(socket, "adding", "role")
     end
   end
 
@@ -144,7 +144,7 @@ defmodule BetPeakWeb.AdminLive.AccessControl do
         {:noreply, socket |> put_flash(:error, "You are not authorized to update a role!")}
 
       {:error, _} ->
-        render_default_form_error(socket, nil, "updating", "role")
+        render_default_form_error(socket, "updating", "role")
     end
   end
 
@@ -162,7 +162,7 @@ defmodule BetPeakWeb.AdminLive.AccessControl do
         {:noreply, socket |> put_flash(:error, "You are not authorized to delete a role!")}
 
       {:error, _} ->
-        render_default_form_error(socket, nil, "deleting", "role")
+        render_default_form_error(socket, "deleting", "role")
     end
   end
 
@@ -241,7 +241,7 @@ defmodule BetPeakWeb.AdminLive.AccessControl do
         {:noreply, socket |> put_flash(:error, "You are not authorized to add role inheritance!")}
 
       {:error, _} ->
-        render_default_form_error(socket, nil, "adding", "role_inheritance")
+        render_default_form_error(socket, "adding", "role inheritance")
     end
   end
 
@@ -274,7 +274,7 @@ defmodule BetPeakWeb.AdminLive.AccessControl do
          socket |> put_flash(:error, "You are not authorized to delete a role inheritance!")}
 
       {:error, _} ->
-        render_default_form_error(socket, nil, "deleting", "role_inheritance")
+        render_default_form_error(socket, "deleting", "role inheritance")
     end
   end
 
@@ -312,7 +312,7 @@ defmodule BetPeakWeb.AdminLive.AccessControl do
          socket |> put_flash(:error, "You are not authorized to add a role permission!")}
 
       {:error, _} ->
-        render_default_form_error(socket, nil, "adding", "role_permission")
+        render_default_form_error(socket, "adding", "role_permission")
     end
   end
 
@@ -346,7 +346,7 @@ defmodule BetPeakWeb.AdminLive.AccessControl do
          socket |> put_flash(:error, "You are not authorized to remove a role permission!")}
 
       {:error, _} ->
-        render_default_form_error(socket, nil, "deleting", "role")
+        render_default_form_error(socket, "deleting", "role")
     end
   end
 
@@ -387,15 +387,6 @@ defmodule BetPeakWeb.AdminLive.AccessControl do
     {:noreply,
      socket
      |> back_to_editing_role()}
-  end
-
-  defp back_to_editing_role(socket) do
-    changeset =
-      Roles.change_creation(socket.assigns.selected_record, %{}, validate_unique: false)
-
-    socket
-    |> assign(modal_operation: "edit")
-    |> assign_form(changeset, "role")
   end
 
   @impl true
@@ -489,7 +480,7 @@ defmodule BetPeakWeb.AdminLive.AccessControl do
         {:noreply, socket |> put_flash(:error, "You are not authorized to add a permission!")}
 
       {:error, _} ->
-        render_default_form_error(socket, nil, "adding", "permission")
+        render_default_form_error(socket, "adding", "permission")
     end
   end
 
@@ -514,7 +505,7 @@ defmodule BetPeakWeb.AdminLive.AccessControl do
         {:noreply, socket |> put_flash(:error, "You are not authorized to update a permission!")}
 
       {:error, _} ->
-        render_default_form_error(socket, nil, "updating", "permission")
+        render_default_form_error(socket, "updating", "permission")
     end
   end
 
@@ -532,7 +523,7 @@ defmodule BetPeakWeb.AdminLive.AccessControl do
         {:noreply, socket |> put_flash(:error, "You are not authorized to delete a permission!")}
 
       {:error, _} ->
-        render_default_form_error(socket, nil, "deleting", "permission")
+        render_default_form_error(socket, "deleting", "permission")
     end
   end
 
@@ -629,7 +620,7 @@ defmodule BetPeakWeb.AdminLive.AccessControl do
         {:noreply, socket |> put_flash(:error, "You are not authorized to add a resource!")}
 
       {:error, _} ->
-        render_default_form_error(socket, nil, "adding", "resource")
+        render_default_form_error(socket, "adding", "resource")
     end
   end
 
@@ -654,7 +645,7 @@ defmodule BetPeakWeb.AdminLive.AccessControl do
         {:noreply, socket |> put_flash(:error, "You are not authorized to update a resource!")}
 
       {:error, _} ->
-        render_default_form_error(socket, nil, "updating", "resource")
+        render_default_form_error(socket, "updating", "resource")
     end
   end
 
@@ -672,7 +663,7 @@ defmodule BetPeakWeb.AdminLive.AccessControl do
         {:noreply, socket |> put_flash(:error, "You are not authorized to delete a resource!")}
 
       {:error, _} ->
-        render_default_form_error(socket, nil, "deleting", "resource")
+        render_default_form_error(socket, "deleting", "resource")
     end
   end
 
@@ -694,31 +685,27 @@ defmodule BetPeakWeb.AdminLive.AccessControl do
     assign(socket, form: form)
   end
 
-  defp render_default_form_error(socket, changeset, operation, table) do
-    case changeset do
-      %Ecto.Changeset{} ->
-        {:noreply,
-         socket
-         |> assign_form(changeset, table)
-         |> put_flash(
-           :error,
-           "Oops! Something went wrong while #{operation} the #{table}. Try again later."
-         )
-         |> close_modal()}
-
-      nil ->
-        {:noreply,
-         socket
-         |> put_flash(
-           :error,
-           "Oops! Something went wrong while #{operation} the #{table}. Try again later."
-         )
-         |> close_modal()}
-    end
+  defp render_default_form_error(socket, operation, table) do
+    {:noreply,
+     socket
+     |> put_flash(
+       :error,
+       "Oops! Something went wrong while #{operation} the #{table}. Try again later."
+     )
+     |> close_modal()}
   end
 
   defp close_modal(socket) do
     socket
     |> reset_states()
+  end
+
+  defp back_to_editing_role(socket) do
+    changeset =
+      Roles.change_creation(socket.assigns.selected_record, %{}, validate_unique: false)
+
+    socket
+    |> assign(modal_operation: "edit")
+    |> assign_form(changeset, "role")
   end
 end

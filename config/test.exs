@@ -42,3 +42,9 @@ config :phoenix_live_view,
 # Sort query params output of verified routes for robust url comparisons
 config :phoenix,
   sort_verified_routes_query_params: true
+
+# Switch oban to test mode
+config :bet_peak, Oban,
+  repo: BetPeak.Repo,
+  # This disables queues and peers, switching Oban into testing mode
+  testing: :manual
