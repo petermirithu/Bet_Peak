@@ -18,11 +18,11 @@
           <.icon name="hero-user-group" class="size-4 text-[#947000]" /> {length(@teams)} Created
         </div>
         <.button
-          :if={@current_scope.user.is_superuser == true}
           class="btn btn-primary rounded-2xl h-10 rounded-2xl items-center gap-2 px-4 text-sm font-semibold text-white"
           phx-click="open_team_modal"
           phx-value-operation="add"
           phx-value-team_id=""
+          disabled={Helpers.is_super_admin(@current_scope) == false}
         >
           <.icon name="hero-plus" class="size-4 text-white" /> Add Team
         </.button>
@@ -39,7 +39,7 @@
               <th>Short Form</th>
               <th>Sport</th>
               <th>Created</th>
-              <th :if={@current_scope.user.is_superuser == true}>
+              <th>
                 <span class="sr-only">Actions</span>
               </th>
             </tr>
@@ -66,15 +66,13 @@
               <td class="whitespace-nowrap text-xs text-[#161616]/50">
                 {Helpers.format_date(team.inserted_at)}
               </td>
-              <td
-                :if={@current_scope.user.is_superuser == true}
-                class="whitespace-nowrap"
-              >
+              <td class="whitespace-nowrap">
                 <.button
                   class="btn btn-circle btn-secondary transition-transform group-hover:translate-y-1 mr-2"
                   phx-click="open_team_modal"
                   phx-value-operation="edit"
                   phx-value-team_id={team.id}
+                  disabled={Helpers.is_super_admin(@current_scope) == false}
                 >
                   <.icon
                     name="hero-pencil"
@@ -86,6 +84,7 @@
                   phx-click="open_team_modal"
                   phx-value-operation="delete"
                   phx-value-team_id={team.id}
+                  disabled={Helpers.is_super_admin(@current_scope) == false}
                 >
                   <.icon
                     name="hero-trash"

@@ -6,45 +6,81 @@ defmodule BetPeak.Bets do
   alias BetPeak.Bets.BetNotifier
   alias BetPeak.Workers
   alias Oban
+  alias BetPeak.Accounts.Scope
+  alias BetPeak.Authorization
 
-  def fetch_all() do
-    from(bet in Bet, where: is_nil(bet.deleted_at))
-    |> Repo.all()
+  def fetch_all(%Scope{} = current_scope) do
+    case Authorization.authorize!(current_scope, "Bets", "read") do
+      :ok ->
+        from(bet in Bet, where: is_nil(bet.deleted_at))
+        |> Repo.all()
+
+      :unauthorized ->
+        []
+    end
   end
 
-  def fetch_active(user_id) do
-    from(bet in Bet,
-      where: is_nil(bet.deleted_at) and bet.status == :pending and bet.user_id == ^user_id
-    )
-    |> Repo.all()
-    |> Repo.preload(:game)
-    |> Repo.preload(game: :home_team, game: :away_team)
+  def fetch_active(%Scope{} = current_scope) do
+    case Authorization.authorize!(current_scope, "Bets", "read") do
+      :ok ->
+        from(bet in Bet,
+          where:
+            is_nil(bet.deleted_at) and bet.status == :pending and
+              bet.user_id == ^current_scope.user.id
+        )
+        |> Repo.all()
+        |> Repo.preload(:game)
+        |> Repo.preload(game: :home_team, game: :away_team)
+
+      :unauthorized ->
+        []
+    end
   end
 
-  def fetch_history(user_id) do
-    bets =
-      from(bet in Bet,
-        where:
-          is_nil(bet.deleted_at) and bet.user_id == ^user_id and
-            bet.status in [:won, :lost, :cancelled]
-      )
-      |> Repo.all()
-      |> Repo.preload(:game)
-      |> Repo.preload(game: :home_team, game: :away_team)
+  def fetch_history(%Scope{} = current_scope) do
+    case Authorization.authorize!(current_scope, "Bets", "read") do
+      :ok ->
+        bets =
+          from(bet in Bet,
+            where:
+              is_nil(bet.deleted_at) and bet.user_id == ^current_scope.user.id and
+                bet.status in [:won, :lost, :cancelled]
+          )
+          |> Repo.all()
+          |> Repo.preload(:game)
+          |> Repo.preload(game: :home_team, game: :away_team)
 
-    calculate_total_payouts(bets)
-    |> Map.put(:bets, bets)
+        calculate_total_payouts(bets)
+        |> Map.put(:bets, bets)
+
+      :unauthorized ->
+        %{
+          bets: [],
+          won: 0,
+          lost: 0
+        }
+    end
   end
 
-  def fetch_admin_user_bets(user_id) do
-    bets =
-      from(bet in Bet, where: is_nil(bet.deleted_at) and bet.user_id == ^user_id)
-      |> Repo.all()
-      |> Repo.preload(:game)
-      |> Repo.preload(game: :home_team, game: :away_team)
+  def fetch_admin_user_bets(%Scope{} = current_scope, user_id) do
+    case Authorization.authorize!(current_scope, "Bets", "read") do
+      :ok ->
+        bets =
+          from(bet in Bet, where: is_nil(bet.deleted_at) and bet.user_id == ^user_id)
+          |> Repo.all()
+          |> Repo.preload(:game)
+          |> Repo.preload(game: :home_team, game: :away_team)
 
-    calculate_total_payouts(bets)
-    |> Map.put(:bets, bets)
+        calculate_total_payouts(bets)
+        |> Map.put(:bets, bets)
+
+      :unauthorized ->
+        %{
+          bets: [],
+          won: 0,
+          lost: 0
+        }
+    end
   end
 
   defp calculate_total_payouts(bets) do
@@ -62,23 +98,36 @@ defmodule BetPeak.Bets do
     end)
   end
 
-  def save_bet(attrs) do
-    %Bet{}
-    |> Bet.changeset(attrs, [])
-    |> Repo.insert()
+  def save_bet(%Scope{} = current_scope, attrs) do
+    case Authorization.authorize!(current_scope, "Bets", "create") do
+      :ok ->
+        %Bet{}
+        |> Bet.changeset(attrs, [])
+        |> Repo.insert()
+
+      :unauthorized ->
+        {:error, :unauthorized}
+    end
   end
 
   def change_bet_creation(bet, attrs \\ %{}, opts \\ []) do
     Bet.changeset(bet, attrs, opts)
   end
 
-  def update_bet(bet, attrs) do
-    bet
-    |> Bet.changeset(attrs, [])
-    |> Repo.update()
+  def update_bet(%Scope{} = current_scope, bet, attrs) do
+    case Authorization.authorize!(current_scope, "Bets", "update") do
+      :ok ->
+        bet
+        |> Bet.changeset(attrs, [])
+        |> Repo.update()
+
+      :unauthorized ->
+        {:error, :unauthorized}
+    end
   end
 
   def settle_game_bets(game_id, game_result) do
+    # Called internally after game has been marked finished already scoped.
     max_stake_amount =
       Repo.one(
         from bet in Bet,
@@ -127,6 +176,7 @@ defmodule BetPeak.Bets do
   end
 
   def settle_bet_and_send_mail(bet_id, game_result) do
+    # Oban Job
     bet =
       from(bet in Bet, where: is_nil(bet.deleted_at) and bet.id == ^bet_id)
       |> Repo.one()
@@ -150,18 +200,26 @@ defmodule BetPeak.Bets do
     end
   end
 
-  def delete_bet(%Bet{} = bet) do
-    bet
-    |> Ecto.Changeset.change(%{deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
-    |> Repo.update()
+  def delete_bet(%Scope{} = current_scope, %Bet{} = bet) do
+    case Authorization.authorize!(current_scope, "Bets", "delete") do
+      :ok ->
+        bet
+        |> Ecto.Changeset.change(%{deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
+        |> Repo.update()
+
+      :unauthorized ->
+        {:error, :unauthorized}
+    end
   end
 
   def delete_many_by_game_id(game_id) do
+    # Oban Job
     from(bet in Bet, where: bet.game_id == ^game_id and is_nil(bet.deleted_at))
     |> Repo.update_all(set: [deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)])
   end
 
   def delete_many_by_user_id(user_id) do
+    # Oban Job
     from(bet in Bet, where: bet.user_id == ^user_id and is_nil(bet.deleted_at))
     |> Repo.update_all(set: [deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)])
   end

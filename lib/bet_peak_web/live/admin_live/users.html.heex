@@ -28,8 +28,6 @@
               <th>User</th>
               <th>Email</th>
               <th>Phone No</th>
-              <th>Role</th>
-              <th>Access</th>
               <th>Verified</th>
               <th>Joined</th>
               <th><span class="sr-only">View user</span></th>
@@ -57,20 +55,6 @@
               </td>
               <td class="text-xs text-[#161616]/65">{user.email}</td>
               <td class="whitespace-nowrap text-xs text-[#161616]/65">{user.msisdn}</td>
-              <td>
-                <span class="inline-flex rounded-2xl bg-[#eee9dc] px-2.5 py-1 text-xs font-bold capitalize text-[#68531a]">
-                  {user.role}
-                </span>
-              </td>
-              <td>
-                <span
-                  :if={user.is_superuser}
-                  class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#947000]"
-                >
-                  <.icon name="hero-shield-check-mini" class="size-4" /> Superuser
-                </span>
-                <span :if={!user.is_superuser} class="text-xs text-[#161616]/35">Standard</span>
-              </td>
               <td>
                 <span
                   :if={user.confirmed_at}
@@ -111,6 +95,7 @@
       show_user_modal={@show_user_modal}
       modal_operation={@modal_operation}
       form={@form}
+      roles={@roles}
       current_scope={@current_scope}
       user_bets_stats={@user_bets_stats}
     />

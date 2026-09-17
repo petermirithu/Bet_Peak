@@ -1,0 +1,481 @@
+<Layouts.app
+  flash={@flash}
+  current_scope={@current_scope}
+>
+  <section
+    id="admin-rbac-page"
+    class={[
+      "mx-auto w-full max-w-[96rem] px-4 py-6",
+      "sm:px-6 lg:px-8 lg:py-10"
+    ]}
+  >
+    <header class={["mb-8"]}>
+      <p class={["mb-2 text-xs font-bold text-[#947000]"]}>
+        Administration
+      </p>
+
+      <div class={["flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between"]}>
+        <div>
+          <h1 class={["text-3xl font-extrabold text-[#161616] sm:text-4xl"]}>
+            Access control
+          </h1>
+          <p class={["mt-2 max-w-2xl text-sm leading-6 text-[#161616]/55"]}>
+            Manage roles, permissions, and protected application resources.
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <div id="rbac-summary" class={["mb-8 grid gap-4 sm:grid-cols-3"]}>
+      <article class={["rounded-2xl border border-[#d8d3c8] bg-white p-5 shadow-sm"]}>
+        <div class={["flex items-center justify-between"]}>
+          <div>
+            <p class={["text-xs font-bold text-[#161616]/40"]}>Roles</p>
+            <p class={["mt-1 text-3xl font-extrabold text-[#161616]"]}>{length(@roles)}</p>
+          </div>
+          <span class={["grid size-11 place-items-center rounded-xl bg-[#161616] text-white"]}>
+            <.icon name="hero-shield-check" class="size-5" />
+          </span>
+        </div>
+      </article>
+
+      <article class={["rounded-2xl border border-[#d8d3c8] bg-white p-5 shadow-sm"]}>
+        <div class={["flex items-center justify-between"]}>
+          <div>
+            <p class={["text-xs font-bold text-[#161616]/40"]}>
+              Permissions
+            </p>
+            <p class={["mt-1 text-3xl font-extrabold text-[#161616]"]}>{length(@permissions)}</p>
+          </div>
+          <span class={["grid size-11 place-items-center rounded-xl bg-[#fff4cd] text-[#947000]"]}>
+            <.icon name="hero-key" class="size-5" />
+          </span>
+        </div>
+      </article>
+
+      <article class={["rounded-2xl border border-[#d8d3c8] bg-white p-5 shadow-sm"]}>
+        <div class={["flex items-center justify-between"]}>
+          <div>
+            <p class={["text-xs font-bold text-[#161616]/40"]}>
+              Resources
+            </p>
+            <p class={["mt-1 text-3xl font-extrabold text-[#161616]"]}>
+              {length(@resources)}
+            </p>
+          </div>
+          <span class={["grid size-11 place-items-center rounded-xl bg-[#f2efe7] text-[#161616]"]}>
+            <.icon name="hero-squares-2x2" class="size-5" />
+          </span>
+        </div>
+      </article>
+    </div>
+
+    <div class={["space-y-7"]}>
+      <div class="tabs tabs-border">
+        <label class="tab">
+          <input
+            type="radio"
+            name="access_control_tabs"
+            checked={@selected_access_control == "roles"}
+          />
+          <.icon name="hero-shield-check mr-1.5" class="size-5" /> Roles
+        </label>
+        <section
+          id="roles-panel"
+          class={[
+            "tab-content scroll-mt-6 overflow-hidden rounded-2xl border border-[#d8d3c8] bg-white shadow-sm"
+          ]}
+        >
+          <header class={[
+            "flex items-center justify-between gap-4 border-b border-[#ece8de] p-5 sm:p-6"
+          ]}>
+            <div>
+              <h2 class={["text-lg font-extrabold text-[#161616]"]}>Roles</h2>
+              <p class={["mt-1 text-sm text-[#161616]/50"]}>
+                Group permissions into reusable access levels.
+              </p>
+            </div>
+
+            <.button
+              id="new-role-button"
+              type="button"
+              phx-click="open_role_modal"
+              phx-value-operation="add"
+              phx-value-role_id=""
+              class={[
+                "inline-flex h-11 items-center justify-center gap-2 rounded-xl cursor-pointer",
+                "bg-[#161616] px-4 text-sm font-bold text-white shadow-sm",
+                "transition hover:-translate-y-0.5 hover:bg-[#2b2b2b]",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#161616]/30"
+              ]}
+            >
+              <.icon name="hero-plus" class="size-4" /> Add role
+            </.button>
+          </header>
+
+          <div class={["overflow-x-auto"]}>
+            <table id="roles-table" class={["w-full min-w-[42rem] text-left"]}>
+              <thead class={["bg-[#faf8f2] text-xs text-[#161616]/45"]}>
+                <tr>
+                  <th class={["px-6 py-4 font-bold"]}>Name</th>
+                  <th class={["px-6 py-4 font-bold"]}>Inheritances</th>
+                  <th class={["px-6 py-4 font-bold"]}>Permissions</th>
+                  <th class={["px-6 py-4 font-bold"]}>Updated</th>
+                  <th class={["px-6 py-4 font-bold"]}>Created</th>
+                  <th class={["px-6 py-4 text-right font-bold"]}>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody id="roles" phx-update="stream" class={["divide-y divide-[#ece8de]"]}>
+                <tr class={["hidden only:table-row"]}>
+                  <td colspan="4" class={["px-6 py-16 text-center"]}>
+                    <.icon
+                      name="hero-shield-exclamation"
+                      class="mx-auto mb-3 size-8 text-[#161616]/20"
+                    />
+                    <p class={["font-semibold text-[#161616]"]}>No roles found</p>
+                    <p class={["mt-1 text-sm text-[#161616]/45"]}>
+                      Create the first role to begin.
+                    </p>
+                  </td>
+                </tr>
+
+                <tr
+                  :for={role <- @roles}
+                  id={"role-#{role.id}"}
+                  class={["group transition-colors hover:bg-[#faf7ed]"]}
+                >
+                  <td class={["px-6 py-4 font-bold text-[#161616]"]}>{role.name}</td>
+                  <td class={["px-6 py-4 text-sm"]}>
+                    <div class="badge badge-soft badge-primary">
+                      {length(role.parent_inheritances)}
+                    </div>
+                  </td>
+                  <td class={["px-6 py-4 text-sm"]}>
+                    <span
+                      title="Unique direct and inherited permissions"
+                      class={[
+                        "inline-flex items-center gap-1.5 rounded-full border",
+                        "border-[#ead890] bg-[#fff8dc] px-2.5 py-1",
+                        "text-xs font-extrabold text-[#735700]"
+                      ]}
+                    >
+                      <.icon name="hero-key" class="size-3.5" />
+                      {role.effective_permission_count}
+                    </span>
+                  </td>
+                  <td class={["px-6 py-4 text-sm text-[#161616]/50"]}>
+                    {Helpers.format_date(role.updated_at)}
+                  </td>
+                  <td class={["px-6 py-4 text-sm text-[#161616]/50"]}>
+                    {Helpers.format_date(role.inserted_at)}
+                  </td>
+                  <td class={["px-6 py-4"]}>
+                    <div class={["flex justify-end gap-2"]}>
+                      <.button
+                        id={"edit-role-#{role.id}"}
+                        type="button"
+                        phx-click="open_role_modal"
+                        phx-value-operation="edit"
+                        phx-value-role_id={role.id}
+                        aria-label={"Edit #{role.name}"}
+                        class={[
+                          "grid size-9 place-items-center rounded-lg border border-[#d8d3c8] cursor-pointer",
+                          "text-[#161616]/55 transition hover:border-[#947000]",
+                          "hover:bg-[#fff8dd] hover:text-[#947000]"
+                        ]}
+                      >
+                        <.icon name="hero-pencil" class="size-4" />
+                      </.button>
+
+                      <.button
+                        id={"delete-role-#{role.id}"}
+                        type="button"
+                        phx-click="open_role_modal"
+                        phx-value-operation="delete"
+                        phx-value-role_id={role.id}
+                        aria-label={"Delete #{role.name}"}
+                        class={[
+                          "grid size-9 place-items-center rounded-lg border border-red-200 cursor-pointer",
+                          "text-red-600 transition hover:bg-red-50"
+                        ]}
+                      >
+                        <.icon name="hero-trash" class="size-4" />
+                      </.button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <label class="tab">
+          <input
+            type="radio"
+            name="access_control_tabs"
+            checked={@selected_access_control == "permissions"}
+          />
+          <.icon name="hero-key mr-1.5" class="size-5" /> Permissions
+        </label>
+        <section
+          id="permissions-panel"
+          class={[
+            "tab-content scroll-mt-6 overflow-hidden rounded-2xl border border-[#d8d3c8] bg-white shadow-sm"
+          ]}
+        >
+          <header class={[
+            "flex items-center justify-between gap-4 border-b border-[#ece8de] p-5 sm:p-6"
+          ]}>
+            <div>
+              <h2 class={["text-lg font-extrabold text-[#161616]"]}>Permissions</h2>
+              <p class={["mt-1 text-sm text-[#161616]/50"]}>
+                Define the actions available for each protected resource.
+              </p>
+            </div>
+
+            <.button
+              id="new-permission-button"
+              type="button"
+              phx-click="open_permission_modal"
+              phx-value-operation="add"
+              phx-value-permission_id=""
+              class={[
+                "inline-flex h-11 items-center justify-center gap-2 rounded-xl cursor-pointer",
+                "border border-[#caa321] bg-[#f4bf25] px-4 text-sm font-bold text-[#161616]",
+                "shadow-sm transition hover:-translate-y-0.5 hover:bg-[#ffd34f]",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4bf25]/40"
+              ]}
+            >
+              <.icon name="hero-plus" class="size-4" /> Add permission
+            </.button>
+          </header>
+
+          <div class={["overflow-x-auto"]}>
+            <table id="permissions-table" class={["w-full min-w-[48rem] text-left"]}>
+              <thead class={["bg-[#faf8f2] text-xs text-[#161616]/45"]}>
+                <tr>
+                  <th class={["px-6 py-4 font-bold"]}>Action</th>
+                  <th class={["px-6 py-4 font-bold"]}>Resource</th>
+                  <th class={["px-6 py-4 font-bold"]}>Created</th>
+                  <th class={["px-6 py-4 text-right font-bold"]}>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody id="permissions" phx-update="stream" class={["divide-y divide-[#ece8de]"]}>
+                <tr :if={length(@permissions) == 0}>
+                  <td colspan="4" class={["px-6 py-16 text-center"]}>
+                    <.icon name="hero-key" class="mx-auto mb-3 size-8 text-[#161616]/20" />
+                    <p class={["font-semibold text-[#161616]"]}>No permissions found</p>
+                  </td>
+                </tr>
+
+                <tr
+                  :for={permission <- @permissions}
+                  :if={length(@permissions) > 0}
+                  id={"permission-#{permission.id}"}
+                  class={["group transition-colors hover:bg-[#faf7ed]"]}
+                >
+                  <td class={["px-6 py-4"]}>
+                    <span class={[
+                      "rounded-lg bg-[#fff4cd] px-2.5 py-1 text-xs font-bold text-[#806000]"
+                    ]}>
+                      {permission.action}
+                    </span>
+                  </td>
+                  <td class={["px-6 py-4 font-semibold text-[#161616]"]}>
+                    {permission.resource.name}
+                  </td>
+                  <td class={["px-6 py-4 text-sm text-[#161616]/50"]}>
+                    {Helpers.format_date(permission.inserted_at)}
+                  </td>
+                  <td class={["px-6 py-4"]}>
+                    <div class={["flex justify-end gap-2"]}>
+                      <.button
+                        id={"edit-permission-#{permission.id}"}
+                        type="button"
+                        phx-click="open_permission_modal"
+                        phx-value-operation="edit"
+                        phx-value-permission_id={permission.id}
+                        aria-label={"Edit #{permission.action} permission"}
+                        class={[
+                          "grid size-9 place-items-center rounded-lg border border-[#d8d3c8] cursor-pointer",
+                          "text-[#161616]/55 transition hover:border-[#947000]",
+                          "hover:bg-[#fff8dd] hover:text-[#947000]"
+                        ]}
+                      >
+                        <.icon name="hero-pencil" class="size-4" />
+                      </.button>
+
+                      <.button
+                        id={"delete-permission-#{permission.id}"}
+                        type="button"
+                        phx-click="open_permission_modal"
+                        phx-value-operation="delete"
+                        phx-value-permission_id={permission.id}
+                        aria-label={"Delete #{permission.action} permission"}
+                        class={[
+                          "grid size-9 place-items-center rounded-lg border border-red-200 cursor-pointer",
+                          "text-red-600 transition hover:bg-red-50"
+                        ]}
+                      >
+                        <.icon name="hero-trash" class="size-4" />
+                      </.button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <label class="tab">
+          <input
+            type="radio"
+            name="access_control_tabs"
+            checked={@selected_access_control == "resources"}
+          />
+          <.icon name="hero-squares-2x2 mr-1.5" class="size-5" /> Resources
+        </label>
+        <section
+          id="resources-panel"
+          class={[
+            "tab-content scroll-mt-6 overflow-hidden rounded-2xl border border-[#d8d3c8] bg-white shadow-sm"
+          ]}
+        >
+          <header class={[
+            "flex items-center justify-between gap-4 border-b border-[#ece8de] p-5 sm:p-6"
+          ]}>
+            <div>
+              <h2 class={["text-lg font-extrabold text-[#161616]"]}>Resources</h2>
+              <p class={["mt-1 text-sm text-[#161616]/50"]}>
+                Register application areas that require authorization.
+              </p>
+            </div>
+
+            <.button
+              id="new-resource-button"
+              type="button"
+              phx-click="open_resource_modal"
+              phx-value-operation="add"
+              phx-value-resource_id=""
+              class={[
+                "inline-flex h-11 items-center justify-center gap-2 rounded-xl cursor-pointer",
+                "border border-[#d8d3c8] bg-white px-4 text-sm font-bold text-[#161616]",
+                "shadow-sm transition hover:-translate-y-0.5 hover:border-[#947000]",
+                "hover:bg-[#faf7ed] focus-visible:outline-none",
+                "focus-visible:ring-2 focus-visible:ring-[#947000]/25"
+              ]}
+            >
+              <.icon name="hero-plus" class="size-4 text-[#947000]" /> Add resource
+            </.button>
+          </header>
+
+          <div class={["overflow-x-auto"]}>
+            <table id="resources-table" class={["w-full min-w-[42rem] text-left"]}>
+              <thead class={["bg-[#faf8f2] text-xs text-[#161616]/45"]}>
+                <tr>
+                  <th class={["px-6 py-4 font-bold"]}>Name</th>
+                  <th class={["px-6 py-4 font-bold"]}>Created</th>
+                  <th class={["px-6 py-4 font-bold"]}>Updated</th>
+                  <th class={["px-6 py-4 text-right font-bold"]}>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody id="resources" phx-update="stream" class={["divide-y divide-[#ece8de]"]}>
+                <tr class={["hidden only:table-row"]}>
+                  <td colspan="4" class={["px-6 py-16 text-center"]}>
+                    <.icon
+                      name="hero-squares-2x2"
+                      class="mx-auto mb-3 size-8 text-[#161616]/20"
+                    />
+                    <p class={["font-semibold text-[#161616]"]}>No resources found</p>
+                  </td>
+                </tr>
+
+                <tr
+                  :for={resource <- @resources}
+                  id={"resource-#{resource.id}"}
+                  class={["group transition-colors hover:bg-[#faf7ed]"]}
+                >
+                  <td class={["px-6 py-4 font-bold text-[#161616]"]}>{resource.name}</td>
+                  <td class={["px-6 py-4 text-sm text-[#161616]/50"]}>
+                    {Helpers.format_date(resource.updated_at)}
+                  </td>
+                  <td class={["px-6 py-4 text-sm text-[#161616]/50"]}>
+                    {Helpers.format_date(resource.inserted_at)}
+                  </td>
+                  <td class={["px-6 py-4"]}>
+                    <div class={["flex justify-end gap-2"]}>
+                      <.button
+                        id={"edit-resource-#{resource.id}"}
+                        type="button"
+                        phx-click="open_resource_modal"
+                        phx-value-operation="edit"
+                        phx-value-resource_id={resource.id}
+                        aria-label={"Edit #{resource.name}"}
+                        class={[
+                          "grid size-9 place-items-center rounded-lg border border-[#d8d3c8] cursor-pointer",
+                          "text-[#161616]/55 transition hover:border-[#947000]",
+                          "hover:bg-[#fff8dd] hover:text-[#947000]"
+                        ]}
+                      >
+                        <.icon name="hero-pencil" class="size-4" />
+                      </.button>
+
+                      <.button
+                        id={"delete-resource-#{resource.id}"}
+                        type="button"
+                        phx-click="open_resource_modal"
+                        phx-value-operation="delete"
+                        phx-value-resource_id={resource.id}
+                        aria-label={"Delete #{resource.name}"}
+                        class={[
+                          "grid size-9 place-items-center rounded-lg border border-red-200 cursor-pointer",
+                          "text-red-600 transition hover:bg-red-50"
+                        ]}
+                      >
+                        <.icon name="hero-trash" class="size-4" />
+                      </.button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <.live_component
+      module={BetPeakWeb.AdminLive.AccessControlRoles}
+      show_role_modal={@show_role_modal}
+      modal_operation={@modal_operation}
+      selected_record={@selected_record}
+      permissions={@permissions}
+      roles={@roles}
+      role_inherits_permission_tab={@role_inherits_permission_tab}
+      form={@form}
+      id="role_modal"
+    />
+
+    <.live_component
+      module={BetPeakWeb.AdminLive.AccessControlPermissions}
+      show_permission_modal={@show_permission_modal}
+      modal_operation={@modal_operation}
+      selected_record={@selected_record}
+      form={@form}
+      resources={@resources}
+      id="permission_modal"
+    />
+
+    <.live_component
+      module={BetPeakWeb.AdminLive.AccessControlResources}
+      show_resource_modal={@show_resource_modal}
+      modal_operation={@modal_operation}
+      selected_record={@selected_record}
+      form={@form}
+      id="resource_modal"
+    />
+  </section>
+</Layouts.app>

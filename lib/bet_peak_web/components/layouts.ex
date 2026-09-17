@@ -6,6 +6,8 @@ defmodule BetPeakWeb.Layouts do
   use BetPeakWeb, :html
   alias BetPeakWeb.Helpers
 
+  alias BetPeak.Authorization
+
   # Embed all files in layouts/* within this module.
   # The default root.html.heex file contains the HTML
   # skeleton of your application, namely HTML headers
@@ -172,7 +174,7 @@ defmodule BetPeakWeb.Layouts do
               </li>
             </ul>
 
-            <%= if admin?(@current_scope) do %>
+            <%= if admin(@current_scope) do %>
               <p class="mb-3 mt-8 px-3 text-[0.65rem] font-bold text-white/35">
                 Administration
               </p>
@@ -183,6 +185,15 @@ defmodule BetPeakWeb.Layouts do
                     class="flex h-11 items-center gap-3 px-3 text-sm font-semibold text-white/70 transition hover:bg-white/8 hover:text-white"
                   >
                     <.icon name="hero-squares-2x2" class="size-5 text-[#f4bf25]" /> Dashboard
+                  </.link>
+                </li>
+                <li :if={superadmin(@current_scope)}>
+                  <.link
+                    navigate={~p"/admin/access_control"}
+                    class="flex h-11 items-center gap-3 px-3 text-sm font-semibold text-white/70 transition hover:bg-white/8 hover:text-white"
+                  >
+                    <.icon name="hero-shield-exclamation" class="size-5 text-[#f4bf25]" />
+                    Access Control
                   </.link>
                 </li>
                 <li>
@@ -266,9 +277,19 @@ defmodule BetPeakWeb.Layouts do
     """
   end
 
-  defp admin?(%{user: %{role: :admin}}), do: true
-  defp admin?(%{user: %{is_superuser: true}}), do: true
-  defp admin?(_current_scope), do: false
+  defp admin(current_scope) do
+    case Authorization.authorize!(current_scope, "Admin Routes", "read") do
+      :ok -> true
+      :unauthorized -> false
+    end
+  end
+
+  defp superadmin(current_scope) do
+    case Authorization.authorize!(current_scope, "Access Control", "read") do
+      :ok -> true
+      :unauthorized -> false
+    end
+  end
 
   defp user_display_name(user) do
     [user.first_name, user.last_name]

@@ -18,12 +18,10 @@ defmodule BetPeakWeb.Router do
   end
 
   pipeline :account_confirmed do
-    plug :browser
     plug BetPeakWeb.Plugs.AccountConfirmed
   end
 
   pipeline :admin_protected do
-    plug :browser
     plug BetPeakWeb.Plugs.AdminProtected
   end
 
@@ -89,6 +87,7 @@ defmodule BetPeakWeb.Router do
         {BetPeakWeb.UserAuth, :mount_current_scope}
       ] do
       live "/admin", AdminLive.Index
+      live "/admin/access_control", AdminLive.AccessControl
       live "/admin/users", AdminLive.Users
       live "/admin/sports", AdminLive.Sports
       live "/admin/teams", AdminLive.Teams

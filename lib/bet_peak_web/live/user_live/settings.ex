@@ -1,16 +1,17 @@
 defmodule BetPeakWeb.UserLive.Settings do
   use BetPeakWeb, :live_view
 
-  on_mount {BetPeakWeb.UserAuth, :require_sudo_mode}
-
   alias BetPeak.Accounts
 
   @impl true
   def mount(%{"token" => token}, _session, socket) do
     socket =
-      case Accounts.update_user_email(socket.assigns.current_scope.user, token) do
+      case Accounts.update_user_email(socket.assigns.current_scope, token) do
         {:ok, _user} ->
           put_flash(socket, :info, "Email changed successfully.")
+
+        {:error, :unauthorized} ->
+          put_flash(socket, :error, "You are not allowed to update the email.")
 
         {:error, _} ->
           put_flash(socket, :error, "Email change link is invalid or it has expired.")
@@ -49,14 +50,15 @@ defmodule BetPeakWeb.UserLive.Settings do
 
   def handle_event("update_email", params, socket) do
     %{"user" => user_params} = params
-    user = socket.assigns.current_scope.user
-    true = Accounts.sudo_mode?(user)
 
-    case Accounts.change_user_email(user, user_params) do
+    case Accounts.send_email_update_confirmation_link(socket.assigns.current_scope, user_params) do
+      {:error, :unauthorized} ->
+        {:noreply, socket |> put_flash(:error, "You are not allowed to update the email!")}
+
       %{valid?: true} = changeset ->
         Accounts.deliver_user_update_email_instructions(
           Ecto.Changeset.apply_action!(changeset, :insert),
-          user.email,
+          socket.assigns.current_scope.user.email,
           &url(~p"/users/settings/confirm-email/#{&1}")
         )
 
@@ -83,7 +85,6 @@ defmodule BetPeakWeb.UserLive.Settings do
   def handle_event("update_password", params, socket) do
     %{"user" => user_params} = params
     user = socket.assigns.current_scope.user
-    true = Accounts.sudo_mode?(user)
 
     case Accounts.change_user_password(user, user_params) do
       %{valid?: true} = changeset ->

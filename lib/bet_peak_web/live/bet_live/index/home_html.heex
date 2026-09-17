@@ -24,7 +24,13 @@
     </header>
 
     <div class="relative min-h-[31rem] overflow-hidden rounded-2xl bg-[#e8e9ed] shadow-[0_16px_50px_rgba(22,22,22,0.12)] sm:aspect-[16/7] sm:min-h-0">
-      <div class="carousel absolute inset-0 w-full">
+      <div
+        id="home-carousel"
+        class="carousel absolute inset-0 w-full"
+        phx-hook=".AutoCarousel"
+        phx-update="ignore"
+        data-interval="2000"
+      >
         <div id="slide1" class="carousel-item relative w-full">
           <img
             alt="Featured football promotion"
@@ -155,6 +161,67 @@
         </div>
       </div>
 
+      <script :type={Phoenix.LiveView.ColocatedHook} name=".AutoCarousel">
+        export default {
+          mounted() {
+            this.slides = Array.from(this.el.querySelectorAll(".carousel-item"))
+            this.currentIndex = 0
+            this.interval = Number(this.el.dataset.interval) || 2000
+            this.reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)")
+
+            this.stop = () => {
+              window.clearInterval(this.timer)
+              this.timer = null
+            }
+
+            this.start = () => {
+              this.stop()
+
+              if (this.slides.length < 2 || document.hidden || this.reducedMotion.matches) return
+
+              this.timer = window.setInterval(() => {
+                this.currentIndex = (this.currentIndex + 1) % this.slides.length
+                this.el.scrollTo({
+                  left: this.slides[this.currentIndex].offsetLeft,
+                  behavior: "smooth"
+                })
+              }, this.interval)
+            }
+
+            this.handleVisibility = () => document.hidden ? this.stop() : this.start()
+            this.handleMotionPreference = () => this.reducedMotion.matches ? this.stop() : this.start()
+            this.handleClick = event => {
+              const link = event.target.closest("a[href^='#slide']")
+              if (!link) return
+
+              const targetId = link.getAttribute("href").slice(1)
+              const targetIndex = this.slides.findIndex(slide => slide.id === targetId)
+              if (targetIndex >= 0) this.currentIndex = targetIndex
+            }
+
+            this.el.addEventListener("mouseenter", this.stop)
+            this.el.addEventListener("mouseleave", this.start)
+            this.el.addEventListener("focusin", this.stop)
+            this.el.addEventListener("focusout", this.start)
+            this.el.addEventListener("click", this.handleClick)
+            document.addEventListener("visibilitychange", this.handleVisibility)
+            this.reducedMotion.addEventListener("change", this.handleMotionPreference)
+            this.start()
+          },
+
+          destroyed() {
+            this.stop()
+            this.el.removeEventListener("mouseenter", this.stop)
+            this.el.removeEventListener("mouseleave", this.start)
+            this.el.removeEventListener("focusin", this.stop)
+            this.el.removeEventListener("focusout", this.start)
+            this.el.removeEventListener("click", this.handleClick)
+            document.removeEventListener("visibilitychange", this.handleVisibility)
+            this.reducedMotion.removeEventListener("change", this.handleMotionPreference)
+          }
+        }
+      </script>
+
       <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(0deg,#e8e9ed_0%,#e8e9ed_48%,transparent_72%)] sm:bg-[linear-gradient(90deg,#e8e9ed_0%,#e8e9ed_37%,rgba(232,233,237,0.9)_44%,transparent_68%)]">
       </div>
 
@@ -201,7 +268,7 @@
     </header>
 
     <div id="featured-games" class="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
-      <button
+      <.button
         :for={game <- @games}
         id={"game-#{game.id}"}
         type="button"
@@ -292,7 +359,7 @@
             </span>
           </div>
         </div>
-      </button>
+      </.button>
 
       <div
         :if={@games == []}

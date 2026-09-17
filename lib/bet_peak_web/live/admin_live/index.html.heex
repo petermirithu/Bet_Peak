@@ -116,7 +116,9 @@
               <p class="truncate text-xs text-[#161616]/45">{user.email}</p>
             </div>
             <div class="hidden text-right sm:block">
-              <p class="text-xs font-semibold capitalize text-[#161616]/60">{user.role}</p>
+              <p class="text-xs font-semibold capitalize text-[#161616]/60">
+                {format_user_roles(user)}
+              </p>
               <p class="mt-0.5 text-[0.65rem] text-[#161616]/35">
                 {Helpers.format_date(user.inserted_at)}
               </p>

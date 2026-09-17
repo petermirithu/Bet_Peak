@@ -5,9 +5,9 @@ defmodule BetPeakWeb.VerifyAccountController do
 
   def index(conn, _params) do
     if conn.assigns[:current_scope].user.confirmed_at == nil &&
-         Accounts.get_user_token_by_context(conn.assigns[:current_scope].user.id, "login") == [] do
+         Accounts.get_user_token_by_context(conn.assigns[:current_scope], "login") == [] do
       Accounts.deliver_login_instructions(
-        conn.assigns[:current_scope].user,
+        conn.assigns[:current_scope],
         &url(~p"/users/log-in/#{&1}")
       )
     end

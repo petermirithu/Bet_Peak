@@ -47,7 +47,7 @@ defmodule BetPeak.Bets.Bet do
   defp add_odds_at_placement(changeset) do
     with selection when selection in [:home, :draw, :away] <- get_field(changeset, :selection),
          game_id when is_integer(game_id) <- get_field(changeset, :game_id),
-         %{} = game <- Games.get_game(game_id) do
+         %{} = game <- Games.get_game_for_bets(game_id) do
       put_change(
         changeset,
         :odds_at_placement,
