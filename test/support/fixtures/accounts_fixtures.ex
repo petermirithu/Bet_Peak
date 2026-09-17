@@ -8,13 +8,24 @@ defmodule BetPeak.AccountsFixtures do
 
   alias BetPeak.Accounts
   alias BetPeak.Accounts.Scope
+  alias BetPeak.Accounts.User
+  alias BetPeak.Repo
 
   def unique_user_email, do: "user#{System.unique_integer()}@example.com"
-  def valid_user_password, do: "hello world!"
+  def valid_user_password, do: "Hello world!"
+
+  def unique_user_msisdn do
+    suffix = System.unique_integer([:positive]) |> rem(100_000_000)
+    "2547#{String.pad_leading(Integer.to_string(suffix), 8, "0")}"
+  end
 
   def valid_user_attributes(attrs \\ %{}) do
     Enum.into(attrs, %{
-      email: unique_user_email()
+      email: unique_user_email(),
+      first_name: "Test",
+      last_name: "User",
+      msisdn: unique_user_msisdn(),
+      password: valid_user_password()
     })
   end
 
@@ -27,8 +38,15 @@ defmodule BetPeak.AccountsFixtures do
     user
   end
 
+  def user_fixture(attrs \\ %{}) do
+    attrs
+    |> unconfirmed_user_fixture()
+    |> User.confirm_changeset()
+    |> Repo.update!()
+  end
+
   def user_scope_fixture do
-    user = user_fixture()
+    user = unconfirmed_user_fixture()
     user_scope_fixture(user)
   end
 

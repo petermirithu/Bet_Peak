@@ -1,4 +1,5 @@
 defmodule BetPeakWeb.Helpers do
+  alias BetPeak.Authorization
   # Contains helper functions for the whole application
 
   def user_initials(user) do
@@ -13,4 +14,11 @@ defmodule BetPeakWeb.Helpers do
 
   def format_date(%DateTime{} = date), do: Calendar.strftime(date, "%d %b %Y %H:%M")
   def format_date(%NaiveDateTime{} = date), do: Calendar.strftime(date, "%d %b %Y %H:%M")
+
+  def is_super_admin(current_scope) do
+    case Authorization.authorize!(current_scope, "Access Control", "read") do
+      :ok -> true
+      :unauthorized -> false
+    end
+  end
 end

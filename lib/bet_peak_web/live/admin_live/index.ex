@@ -10,7 +10,10 @@ defmodule BetPeakWeb.AdminLive.Index do
   @impl true
   def mount(_params, _session, socket) do
     users = Accounts.get_all_users(socket.assigns.current_scope)
-    bets = Bets.fetch_all()
+
+    IO.inspect(hd(users))
+
+    bets = Bets.fetch_all(socket.assigns.current_scope)
 
     bet_stats =
       Enum.reduce(bets, %{profits: 0, losses: 0}, fn bet, acc ->
@@ -28,8 +31,8 @@ defmodule BetPeakWeb.AdminLive.Index do
 
     stats = %{
       users: Enum.count(users),
-      sports: Enum.count(Sports.fetch_all()),
-      games: Enum.count(Games.fetch_all()),
+      sports: Enum.count(Sports.fetch_all(socket.assigns.current_scope)),
+      games: Enum.count(Games.fetch_all(socket.assigns.current_scope)),
       bets: Enum.count(bets),
       profits: bet_stats.profits,
       losses: bet_stats.losses
@@ -39,5 +42,11 @@ defmodule BetPeakWeb.AdminLive.Index do
      socket
      |> assign(stats: stats)
      |> assign(recent_users: Enum.take(users, 5))}
+  end
+
+  def format_user_roles(user) do
+    Enum.map(user.user_roles, fn user_role ->
+      "#{user_role.role.name} "
+    end)
   end
 end

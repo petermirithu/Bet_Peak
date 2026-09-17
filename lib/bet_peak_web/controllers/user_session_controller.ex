@@ -45,21 +45,25 @@ defmodule BetPeakWeb.UserSessionController do
   end
 
   def update_password(conn, %{"user" => user_params} = params) do
-    user = conn.assigns.current_scope.user
-    true = Accounts.sudo_mode?(user)
-    {:ok, {_user, expired_tokens}} = Accounts.update_user_password(user, user_params)
+    case Accounts.update_user_password(conn.assigns.current_scope, user_params) do
+      {:ok, {_user, expired_tokens}} ->
+        # disconnect all existing LiveViews with old sessions
+        UserAuth.disconnect_sessions(expired_tokens)
 
-    # disconnect all existing LiveViews with old sessions
-    UserAuth.disconnect_sessions(expired_tokens)
+        conn
+        |> put_session(:user_return_to, ~p"/users/settings")
+        |> create(params, "Password updated successfully!")
 
-    conn
-    |> put_session(:user_return_to, ~p"/users/settings")
-    |> create(params, "Password updated successfully!")
+      {:error, :unauthorized} ->
+        conn
+        |> put_session(:user_return_to, ~p"/users/settings")
+        |> create(params, "You are not allowed to update the password!")
+    end
   end
 
   def delete(conn, _params) do
     conn
-    |> put_flash(:info, "Logged out successfully.")
     |> UserAuth.log_out_user()
+    |> put_flash(:info, "Logged out successfully.")
   end
 end

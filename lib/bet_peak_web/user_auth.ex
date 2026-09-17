@@ -30,16 +30,24 @@ defmodule BetPeakWeb.UserAuth do
 
   def log_out_user(conn) do
     user_token = get_session(conn, :user_token)
-    user_token && Accounts.delete_user_session_token(user_token)
 
-    if live_socket_id = get_session(conn, :live_socket_id) do
-      BetPeakWeb.Endpoint.broadcast(live_socket_id, "disconnect", %{})
-    end
+    user_token &&
+      case Accounts.delete_user_session_token(conn.assigns.current_scope, user_token) do
+        :ok ->
+          if live_socket_id = get_session(conn, :live_socket_id) do
+            BetPeakWeb.Endpoint.broadcast(live_socket_id, "disconnect", %{})
+          end
 
-    conn
-    |> renew_session(nil)
-    |> delete_resp_cookie(@remember_me_cookie, @remember_me_options)
-    |> redirect(to: ~p"/users/log-in")
+          conn
+          |> renew_session(nil)
+          |> delete_resp_cookie(@remember_me_cookie, @remember_me_options)
+          |> redirect(to: ~p"/users/log-in")
+
+        {:error, :unauthorized} ->
+          conn
+          |> put_flash(:error, "You not authorized to log out!")
+          |> redirect(to: ~p"/")
+      end
   end
 
   def fetch_current_scope_for_user(conn, _opts) do
@@ -141,21 +149,6 @@ defmodule BetPeakWeb.UserAuth do
       socket =
         socket
         |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
-        |> Phoenix.LiveView.redirect(to: ~p"/users/log-in")
-
-      {:halt, socket}
-    end
-  end
-
-  def on_mount(:require_sudo_mode, _params, session, socket) do
-    socket = mount_current_scope(socket, session)
-
-    if Accounts.sudo_mode?(socket.assigns.current_scope.user, -10) do
-      {:cont, socket}
-    else
-      socket =
-        socket
-        |> Phoenix.LiveView.put_flash(:error, "You must re-authenticate to access this page.")
         |> Phoenix.LiveView.redirect(to: ~p"/users/log-in")
 
       {:halt, socket}

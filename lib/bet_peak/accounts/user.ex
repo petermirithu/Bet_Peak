@@ -7,8 +7,6 @@ defmodule BetPeak.Accounts.User do
     field :last_name, :string
     field :email, :string
     field :msisdn, :string
-    field :role, Ecto.Enum, values: [:admin, :user], default: :user
-    field :is_superuser, :boolean, default: false
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
@@ -19,6 +17,9 @@ defmodule BetPeak.Accounts.User do
     has_many :teams, BetPeak.Teams.Team
     has_many :games, BetPeak.Games.Game
     has_many :bets, BetPeak.Bets.Bet
+    has_many :user_roles, BetPeak.UserRoles.UserRole
+
+    many_to_many :roles, BetPeak.Roles.Role, join_through: BetPeak.UserRoles.UserRole
 
     timestamps(type: :utc_datetime)
   end
@@ -35,24 +36,6 @@ defmodule BetPeak.Accounts.User do
     |> unique_constraint(:email)
     |> unique_constraint(:msisdn)
     |> validate_password(opts)
-  end
-
-  def access_changeset(user, attrs) do
-    user
-    |> cast(attrs, [:role, :is_superuser])
-    |> validate_required([:role, :is_superuser])
-    |> validate_is_superuser()
-  end
-
-  defp validate_is_superuser(changeset) do
-    role = get_field(changeset, :role)
-    is_superuser = get_field(changeset, :is_superuser)
-
-    if role && is_superuser && role == :user && is_superuser == true do
-      add_error(changeset, :is_superuser, "A normal user can not be a super user!")
-    else
-      changeset
-    end
   end
 
   defp format_first_last_name(changeset) do

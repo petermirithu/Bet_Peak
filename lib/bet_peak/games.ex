@@ -5,22 +5,37 @@ defmodule BetPeak.Games do
   alias BetPeak.Games.Game
   alias BetPeak.Bets
   alias BetPeak.Workers
+  alias BetPeak.Authorization
+  alias BetPeak.Accounts.Scope
 
-  def fetch_all() do
-    from(game in Game, where: is_nil(game.deleted_at))
-    |> Repo.all()
-    |> Repo.preload(:home_team)
-    |> Repo.preload(:away_team)
+  def fetch_all(%Scope{} = current_scope) do
+    case Authorization.authorize!(current_scope, "Games", "read") do
+      :ok ->
+        from(game in Game, where: is_nil(game.deleted_at))
+        |> Repo.all()
+        |> Repo.preload(:home_team)
+        |> Repo.preload(:away_team)
+
+      :unauthorized ->
+        []
+    end
   end
 
-  def fetch_active() do
-    from(game in Game, where: is_nil(game.deleted_at) and game.status in [:scheduled, :live])
-    |> Repo.all()
-    |> Repo.preload(:home_team)
-    |> Repo.preload(:away_team)
+  def fetch_active(%Scope{} = current_scope) do
+    case Authorization.authorize!(current_scope, "Games", "read") do
+      :ok ->
+        from(game in Game, where: is_nil(game.deleted_at) and game.status in [:scheduled, :live])
+        |> Repo.all()
+        |> Repo.preload(:home_team)
+        |> Repo.preload(:away_team)
+
+      :unauthorized ->
+        []
+    end
   end
 
-  def get_game(id) do
+  def get_game_for_bets(id) do
+    # Private for bets
     from(
       game in Game,
       where: is_nil(game.deleted_at) and game.id == ^id,
@@ -29,45 +44,66 @@ defmodule BetPeak.Games do
     |> Repo.one()
   end
 
-  def save_game(attrs) do
-    %Game{}
-    |> Game.changeset(attrs, [])
-    |> Repo.insert()
+  def save_game(%Scope{} = current_scope, attrs) do
+    case Authorization.authorize!(current_scope, "Games", "create") do
+      :ok ->
+        %Game{}
+        |> Game.changeset(attrs, [])
+        |> Repo.insert()
+
+      :unauthorized ->
+        {:error, :unauthorized}
+    end
   end
 
   def change_game_creation(game, attrs \\ %{}, opts \\ []) do
     Game.changeset(game, attrs, opts)
   end
 
-  def update_game(game, attrs) do
-    previous_status = game.status
+  def update_game(%Scope{} = current_scope, game, attrs) do
+    case Authorization.authorize!(current_scope, "Games", "update") do
+      :ok ->
+        previous_status = game.status
 
-    result =
-      game
-      |> Game.changeset(attrs, [])
-      |> Repo.update()
+        result =
+          game
+          |> Game.changeset(attrs, [])
+          |> Repo.update()
 
-    case result do
-      {:ok, updated_game} ->
-        if previous_status != :finished and updated_game.status == :finished do
-          Bets.settle_game_bets(updated_game.id, updated_game.result)
+        case result do
+          {:ok, updated_game} ->
+            if previous_status != :finished and updated_game.status == :finished do
+              Bets.settle_game_bets(updated_game.id, updated_game.result)
+            end
+
+            result
+
+          error ->
+            error
         end
 
-        result
-
-      error ->
-        error
+      :unauthorized ->
+        {:error, :unauthorized}
     end
   end
 
-  def delete_game(game) do
-    game
-    |> Ecto.Changeset.change(%{deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
-    |> Repo.update()
-    |> Workers.SoftDelete.delete_children_records("game_bets")
+  def delete_game(%Scope{} = current_scope, game) do
+    case Authorization.authorize!(current_scope, "Games", "delete") do
+      :ok ->
+        game
+        |> Ecto.Changeset.change(%{deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
+        |> Repo.update()
+        |> Workers.SoftDelete.delete_children_records("game_bets")
+
+      :unauthorized ->
+        {:error, :unauthorized}
+    end
   end
 
+  @spec delete_many_by_team_id(any()) :: :ok
   def delete_many_by_team_id(team_id) do
+    # Scope is already on delete team
+    # Called when a team is deleted.
     query =
       from(game in Game,
         where:
