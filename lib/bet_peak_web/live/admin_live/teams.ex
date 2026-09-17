@@ -9,7 +9,7 @@ defmodule BetPeakWeb.AdminLive.Teams do
   @impl true
   def mount(_params, _session, socket) do
     sports =
-      Sports.fetch_all(socket.assigns.current_scope)
+      Sports.fetch_all_active(socket.assigns.current_scope)
       |> Enum.map(&{&1.name, &1.id})
 
     {

@@ -6,7 +6,6 @@ defmodule BetPeak.Sports.Sport do
     field :name, :string
     field :description, :string
     field :active, :boolean, default: true
-    field :slug, :string
     field :deleted_at, :utc_datetime
 
     belongs_to :user, BetPeak.Accounts.User
@@ -21,22 +20,10 @@ defmodule BetPeak.Sports.Sport do
     |> cast(attrs, [:name, :description, :active, :user_id])
     |> validate_required([:name, :description, :active, :user_id])
     |> validate_length(:name, min: 2, max: 50)
-    |> unique_constraint(:name)
+    |> unique_constraint(:name,
+      repo_opts: [where: "deleted_at IS NULL"],
+      message: "is already taken"
+    )
     |> validate_length(:description, min: 10, max: 200)
-    |> generate_slug()
-  end
-
-  defp generate_slug(changeset) do
-    with name when changeset.valid? <- get_change(changeset, :name) || get_field(changeset, :name) do
-      slug =
-        name
-        |> String.downcase()
-        |> String.replace(~r/\s+/, "-")
-
-      put_change(changeset, :slug, slug)
-    else
-      _ ->
-        changeset
-    end
   end
 end

@@ -7,6 +7,17 @@ defmodule BetPeak.Sports do
   alias BetPeak.Accounts.Scope
   alias BetPeak.Authorization
 
+  def fetch_all_active(%Scope{} = current_scope) do
+    case Authorization.authorize!(current_scope, "Sports", "read") do
+      :ok ->
+        from(sport in Sport, where: is_nil(sport.deleted_at) and sport.active == true)
+        |> Repo.all()
+
+      :unauthorized ->
+        []
+    end
+  end
+
   def fetch_all(%Scope{} = current_scope) do
     case Authorization.authorize!(current_scope, "Sports", "read") do
       :ok ->

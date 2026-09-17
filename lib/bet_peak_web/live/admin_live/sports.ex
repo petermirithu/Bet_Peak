@@ -4,7 +4,6 @@ defmodule BetPeakWeb.AdminLive.Sports do
   alias BetPeakWeb.Helpers
   alias BetPeak.Sports
   alias BetPeak.Sports.Sport
-  alias BetPeak.Authorization
 
   @impl true
   def mount(_params, _session, socket) do
@@ -85,7 +84,11 @@ defmodule BetPeakWeb.AdminLive.Sports do
          |> assign(show_sport_modal: false)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render_default_form_error(socket, changeset, "adding")
+        {
+          :noreply,
+          socket
+          |> assign_form(changeset)
+        }
 
       {:error, :unauthorized} ->
         {:noreply,
@@ -93,7 +96,7 @@ defmodule BetPeakWeb.AdminLive.Sports do
          |> put_flash(:error, "You are not authorized to add a sport!")}
 
       {:error, _} ->
-        render_default_form_error(socket, nil, "adding")
+        render_default_form_error(socket, "adding")
     end
   end
 
@@ -114,7 +117,11 @@ defmodule BetPeakWeb.AdminLive.Sports do
          |> assign(show_sport_modal: false)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render_default_form_error(socket, changeset, "updating")
+        {
+          :noreply,
+          socket
+          |> assign_form(changeset)
+        }
 
       {:error, :unauthorized} ->
         {:noreply,
@@ -122,7 +129,7 @@ defmodule BetPeakWeb.AdminLive.Sports do
          |> put_flash(:error, "You are not authorized to update a sport!")}
 
       {:error, _} ->
-        render_default_form_error(socket, nil, "updating")
+        render_default_form_error(socket, "updating")
     end
   end
 
@@ -136,16 +143,13 @@ defmodule BetPeakWeb.AdminLive.Sports do
          |> put_flash(:info, "Successfully deleted the sport")
          |> assign(show_sport_modal: false)}
 
-      {:error, %Ecto.Changeset{} = changeset} ->
-        render_default_form_error(socket, changeset, "deleting")
-
       {:error, :unauthorized} ->
         {:noreply,
          socket
          |> put_flash(:error, "You are not authorized to delete a sport!")}
 
       {:error, _} ->
-        render_default_form_error(socket, nil, "deleting")
+        render_default_form_error(socket, "deleting")
     end
   end
 
@@ -165,27 +169,14 @@ defmodule BetPeakWeb.AdminLive.Sports do
     {:noreply, assign_form(socket, Map.put(changeset, :action, :validate))}
   end
 
-  defp render_default_form_error(socket, changeset, operation) do
-    case changeset do
-      nil ->
-        {:noreply,
-         socket
-         |> put_flash(
-           :error,
-           "Oops! Something went wrong while #{operation} the sport. Try again later."
-         )
-         |> assign(show_sport_modal: false)}
-
-      _ ->
-        {:noreply,
-         socket
-         |> assign_form(changeset)
-         |> put_flash(
-           :error,
-           "Oops! Something went wrong while #{operation} the sport. Try again later."
-         )
-         |> assign(show_sport_modal: false)}
-    end
+  defp render_default_form_error(socket, operation) do
+    {:noreply,
+     socket
+     |> put_flash(
+       :error,
+       "Oops! Something went wrong while #{operation} the sport. Try again later."
+     )
+     |> assign(show_sport_modal: false)}
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
