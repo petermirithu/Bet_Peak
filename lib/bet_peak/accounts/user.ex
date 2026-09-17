@@ -33,7 +33,6 @@ defmodule BetPeak.Accounts.User do
     |> validate_length(:last_name, min: 3)
     |> validate_length(:msisdn, min: 11, max: 15)
     |> validate_email(opts)
-    |> unique_constraint(:email)
     |> unique_constraint(:msisdn)
     |> validate_password(opts)
   end
@@ -60,8 +59,10 @@ defmodule BetPeak.Accounts.User do
 
     if Keyword.get(opts, :validate_unique, true) do
       changeset
-      |> unsafe_validate_unique(:email, BetPeak.Repo)
-      |> unique_constraint(:email)
+      |> unique_constraint(:email,
+        repo_opts: [where: "deleted_at IS NULL"],
+        message: "is already taken!"
+      )
       |> validate_email_changed()
     else
       changeset
