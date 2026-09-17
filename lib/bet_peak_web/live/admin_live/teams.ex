@@ -92,7 +92,7 @@ defmodule BetPeakWeb.AdminLive.Teams do
          |> assign(show_team_modal: false)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render_default_form_error(socket, changeset, "adding")
+        {:noreply, socket |> assign_form(changeset)}
 
       {:error, :unauthorized} ->
         {:noreply, socket |> put_flash(:error, "You not authorized to create a team!")}
@@ -119,7 +119,7 @@ defmodule BetPeakWeb.AdminLive.Teams do
          |> assign(show_team_modal: false)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render_default_form_error(socket, changeset, "updating")
+        {:noreply, socket |> assign_form(changeset)}
 
       {:error, :unauthorized} ->
         {:noreply, socket |> put_flash(:error, "You not authorized to update a team!")}
