@@ -36,7 +36,6 @@
               <th class="w-12 text-center">#</th>
               <th>Name</th>
               <th>Description</th>
-              <th>Slug</th>
               <th>Active</th>
               <th>Created</th>
               <th>
@@ -55,9 +54,6 @@
                 <p class="font-bold text-[#161616]">{sport.name}</p>
               </td>
               <td class="text-xs text-[#161616]/65 max-w-90">{sport.description}</td>
-              <td class="whitespace-nowrap text-xs text-[#161616]/65">
-                <span class="badge badge-sm badge-outline badge-primary">{sport.slug}</span>
-              </td>
               <td class="whitespace-nowrap text-xs text-[#161616]/65">
                 <span
                   :if={sport.active}

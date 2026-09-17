@@ -7,7 +7,6 @@ defmodule BetPeakWeb.AdminLive.Users do
   alias BetPeak.Roles
   alias BetPeak.UserRoles
   alias BetPeak.UserRoles.UserRole
-  alias BetPeak.Authorization
 
   @impl true
   def mount(_params, _session, socket) do

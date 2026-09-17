@@ -9,7 +9,7 @@ defmodule BetPeakWeb.AdminLive.Teams do
   @impl true
   def mount(_params, _session, socket) do
     sports =
-      Sports.fetch_all(socket.assigns.current_scope)
+      Sports.fetch_all_active(socket.assigns.current_scope)
       |> Enum.map(&{&1.name, &1.id})
 
     {
@@ -92,7 +92,7 @@ defmodule BetPeakWeb.AdminLive.Teams do
          |> assign(show_team_modal: false)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render_default_form_error(socket, changeset, "adding")
+        {:noreply, socket |> assign_form(changeset)}
 
       {:error, :unauthorized} ->
         {:noreply, socket |> put_flash(:error, "You not authorized to create a team!")}
@@ -119,7 +119,7 @@ defmodule BetPeakWeb.AdminLive.Teams do
          |> assign(show_team_modal: false)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render_default_form_error(socket, changeset, "updating")
+        {:noreply, socket |> assign_form(changeset)}
 
       {:error, :unauthorized} ->
         {:noreply, socket |> put_flash(:error, "You not authorized to update a team!")}

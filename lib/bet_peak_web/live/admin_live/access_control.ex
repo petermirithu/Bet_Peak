@@ -1,5 +1,4 @@
 defmodule BetPeakWeb.AdminLive.AccessControl do
-  alias Mail.Encoders.Binary
   use BetPeakWeb, :live_view
 
   alias BetPeak.Roles
@@ -697,19 +696,19 @@ defmodule BetPeakWeb.AdminLive.AccessControl do
 
   defp render_default_form_error(socket, changeset, operation, table) do
     case changeset do
-      nil ->
+      %Ecto.Changeset{} ->
         {:noreply,
          socket
+         |> assign_form(changeset, table)
          |> put_flash(
            :error,
            "Oops! Something went wrong while #{operation} the #{table}. Try again later."
          )
          |> close_modal()}
 
-      _ ->
+      nil ->
         {:noreply,
          socket
-         |> assign_form(changeset, table)
          |> put_flash(
            :error,
            "Oops! Something went wrong while #{operation} the #{table}. Try again later."
