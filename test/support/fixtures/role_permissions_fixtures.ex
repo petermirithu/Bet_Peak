@@ -19,10 +19,6 @@ defmodule BetPeak.RolePermissionsFixtures do
     role
   end
 
-  def get_role_and_permission do
-    {create_role(), create_permission()}
-  end
-
   def get_valid_attributes(role_id, permission_id) do
     %{
       role_id: role_id,
@@ -35,21 +31,6 @@ defmodule BetPeak.RolePermissionsFixtures do
       role_id: nil,
       permission_id: nil
     }
-  end
-
-  def add_role_permissions(scope) do
-    role = create_role()
-    permission_1 = create_permission()
-    permission_2 = create_permission()
-    permission_3 = create_permission()
-
-    valid_active_1 = get_valid_attributes(role.id, permission_1.id)
-    valid_active_2 = get_valid_attributes(role.id, permission_2.id)
-    valid_active_3 = get_valid_attributes(role.id, permission_3.id)
-
-    BetPeak.RolePermissions.save(scope, valid_active_1)
-    BetPeak.RolePermissions.save(scope, valid_active_2)
-    BetPeak.RolePermissions.save(scope, valid_active_3)
   end
 
   def add_role_permission(scope, role_id, permission_id) do
