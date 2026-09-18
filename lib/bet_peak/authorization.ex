@@ -18,12 +18,12 @@ defmodule BetPeak.Authorization do
     end
   end
 
-  def permitted?(
-        %Scope{user: %{id: user_id}},
-        resource_name,
-        action
-      )
-      when is_binary(resource_name) and is_binary(action) do
+  defp permitted?(
+         %Scope{user: %{id: user_id}},
+         resource_name,
+         action
+       )
+       when is_binary(resource_name) and is_binary(action) do
     direct_roles =
       from(user_role in UserRole,
         join: role in Role,
@@ -59,7 +59,4 @@ defmodule BetPeak.Authorization do
     |> with_cte("effective_roles", as: ^effective_roles)
     |> Repo.exists?()
   end
-
-  def permitted?(%Scope{}, _resource, _action), do: false
-  def permitted?(_scope, _resource, _action), do: false
 end
