@@ -16,14 +16,16 @@ defmodule BetPeakWeb.UserSessionController do
   defp confirm_user_account(conn, %{"user" => user_params}, info) do
     %{"token" => token, "remember_me" => _remember_me} = user_params
 
-    if {:ok, {user, _}} = Accounts.confirm_new_user_account(token) do
-      conn
-      |> put_flash(:info, info)
-      |> UserAuth.log_in_user(user, user_params)
-    else
-      conn
-      |> put_flash(:error, "Something went wrong while confirming your account.")
-      |> redirect(to: ~p"/users/log-in")
+    case Accounts.confirm_new_user_account(token) do
+      {:ok, {user, _}} ->
+        conn
+        |> put_flash(:info, info)
+        |> UserAuth.log_in_user(user, user_params)
+
+      _ ->
+        conn
+        |> put_flash(:error, "Something went wrong while confirming your account.")
+        |> redirect(to: ~p"/users/log-in")
     end
   end
 
