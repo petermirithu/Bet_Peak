@@ -75,8 +75,9 @@ defmodule BetPeak.AccessControlFixtures do
     setup_role_inherits(user, admin)
     setup_role_inherits(admin, super_admin)
 
-    setup_resource_permissions(super_admin, admin, "Sports")
     setup_resource_permissions(super_admin, admin, "Access Control")
+    setup_resource_permissions(super_admin, admin, "Sports")
+    setup_resource_permissions(super_admin, admin, "Teams")
   end
 
   def convert_user_to_admin(user, admin_option) do
