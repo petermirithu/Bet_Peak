@@ -1,9 +1,8 @@
 defmodule BetPeak.SportsTest do
   use BetPeak.DataCase
 
-  alias BetPeak.Sports
-
   describe "sports" do
+    alias BetPeak.Sports
     alias BetPeak.Sports.Sport
 
     import BetPeak.AccountsFixtures,

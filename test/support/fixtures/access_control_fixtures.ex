@@ -2,6 +2,7 @@ defmodule BetPeak.AccessControlFixtures do
   use BetPeakWeb.ConnCase, async: true
 
   import Ecto.Query
+  alias Phoenix.Router.Resource
   alias BetPeak.Repo
 
   alias BetPeak.Resources.Resource
@@ -39,22 +40,31 @@ defmodule BetPeak.AccessControlFixtures do
     |> Repo.insert()
   end
 
-  defp setup_sports_permissions(super_admin, admin) do
-    # Sports section
-    resource_1 = setup_resource("Sports")
+  defp setup_resource_permissions(super_admin, admin, resource_name) do
+    resource = setup_resource(resource_name)
 
-    permission_1 = setup_permission(resource_1, "Create")
-    permission_2 = setup_permission(resource_1, "Read")
-    permission_3 = setup_permission(resource_1, "Update")
-    permission_4 = setup_permission(resource_1, "Delete")
+    permission_1 = setup_permission(resource, "Create")
+    permission_2 = setup_permission(resource, "Read")
+    permission_3 = setup_permission(resource, "Update")
+    permission_4 = setup_permission(resource, "Delete")
 
-    # admin can read sports
-    setup_role_permission(admin, permission_2)
+    case resource_name do
+      "Access Control" ->
+        # super admin can CRUD Access controls
+        setup_role_permission(super_admin, permission_1)
+        setup_role_permission(super_admin, permission_2)
+        setup_role_permission(super_admin, permission_3)
+        setup_role_permission(super_admin, permission_4)
 
-    # super admin does CUD on sports
-    setup_role_permission(super_admin, permission_1)
-    setup_role_permission(super_admin, permission_3)
-    setup_role_permission(super_admin, permission_4)
+      _ ->
+        # admin can read Sports
+        setup_role_permission(admin, permission_2)
+
+        # super admin does CUD on sports
+        setup_role_permission(super_admin, permission_1)
+        setup_role_permission(super_admin, permission_3)
+        setup_role_permission(super_admin, permission_4)
+    end
   end
 
   def setup_roles do
@@ -65,7 +75,8 @@ defmodule BetPeak.AccessControlFixtures do
     setup_role_inherits(user, admin)
     setup_role_inherits(admin, super_admin)
 
-    setup_sports_permissions(super_admin, admin)
+    setup_resource_permissions(super_admin, admin, "Sports")
+    setup_resource_permissions(super_admin, admin, "Access Control")
   end
 
   def convert_user_to_admin(user, admin_option) do
