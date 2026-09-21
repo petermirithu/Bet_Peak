@@ -179,11 +179,7 @@
                         phx-value-operation="edit"
                         phx-value-role_id={role.id}
                         aria-label={"Edit #{role.name}"}
-                        class={[
-                          "grid size-9 place-items-center rounded-lg border border-[#d8d3c8] cursor-pointer",
-                          "text-[#161616]/55 transition hover:border-[#947000]",
-                          "hover:bg-[#fff8dd] hover:text-[#947000]"
-                        ]}
+                        class="btn btn-circle btn-secondary transition-transform group-hover:translate-y-1"
                       >
                         <.icon name="hero-pencil" class="size-4" />
                       </.button>
@@ -195,10 +191,7 @@
                         phx-value-operation="delete"
                         phx-value-role_id={role.id}
                         aria-label={"Delete #{role.name}"}
-                        class={[
-                          "grid size-9 place-items-center rounded-lg border border-red-200 cursor-pointer",
-                          "text-red-600 transition hover:bg-red-50"
-                        ]}
+                        class="btn btn-circle btn-error transition-transform group-hover:translate-y-1"
                       >
                         <.icon name="hero-trash" class="size-4" />
                       </.button>
@@ -298,11 +291,7 @@
                         phx-value-operation="edit"
                         phx-value-permission_id={permission.id}
                         aria-label={"Edit #{permission.action} permission"}
-                        class={[
-                          "grid size-9 place-items-center rounded-lg border border-[#d8d3c8] cursor-pointer",
-                          "text-[#161616]/55 transition hover:border-[#947000]",
-                          "hover:bg-[#fff8dd] hover:text-[#947000]"
-                        ]}
+                        class="btn btn-circle btn-secondary transition-transform group-hover:translate-y-1"
                       >
                         <.icon name="hero-pencil" class="size-4" />
                       </.button>
@@ -314,10 +303,7 @@
                         phx-value-operation="delete"
                         phx-value-permission_id={permission.id}
                         aria-label={"Delete #{permission.action} permission"}
-                        class={[
-                          "grid size-9 place-items-center rounded-lg border border-red-200 cursor-pointer",
-                          "text-red-600 transition hover:bg-red-50"
-                        ]}
+                        class="btn btn-circle btn-error transition-transform group-hover:translate-y-1"
                       >
                         <.icon name="hero-trash" class="size-4" />
                       </.button>
@@ -414,11 +400,7 @@
                         phx-value-operation="edit"
                         phx-value-resource_id={resource.id}
                         aria-label={"Edit #{resource.name}"}
-                        class={[
-                          "grid size-9 place-items-center rounded-lg border border-[#d8d3c8] cursor-pointer",
-                          "text-[#161616]/55 transition hover:border-[#947000]",
-                          "hover:bg-[#fff8dd] hover:text-[#947000]"
-                        ]}
+                        class="btn btn-circle btn-secondary transition-transform group-hover:translate-y-1"
                       >
                         <.icon name="hero-pencil" class="size-4" />
                       </.button>
@@ -430,10 +412,7 @@
                         phx-value-operation="delete"
                         phx-value-resource_id={resource.id}
                         aria-label={"Delete #{resource.name}"}
-                        class={[
-                          "grid size-9 place-items-center rounded-lg border border-red-200 cursor-pointer",
-                          "text-red-600 transition hover:bg-red-50"
-                        ]}
+                        class="btn btn-circle btn-error transition-transform group-hover:translate-y-1"
                       >
                         <.icon name="hero-trash" class="size-4" />
                       </.button>
