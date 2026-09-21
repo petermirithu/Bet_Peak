@@ -32,21 +32,20 @@ defmodule BetPeakWeb.UserAuth do
     user_token = get_session(conn, :user_token)
 
     user_token &&
-      case Accounts.delete_user_session_token(conn.assigns.current_scope, user_token) do
-        :ok ->
-          if live_socket_id = get_session(conn, :live_socket_id) do
-            BetPeakWeb.Endpoint.broadcast(live_socket_id, "disconnect", %{})
-          end
+      Accounts.delete_user_session_token conn.assigns.current_scope, user_token do
+        if live_socket_id = get_session(conn, :live_socket_id) do
+          BetPeakWeb.Endpoint.broadcast(live_socket_id, "disconnect", %{})
+        end
 
-          conn
-          |> renew_session(nil)
-          |> delete_resp_cookie(@remember_me_cookie, @remember_me_options)
-          |> redirect(to: ~p"/users/log-in")
+        conn
+        |> renew_session(nil)
+        |> delete_resp_cookie(@remember_me_cookie, @remember_me_options)
+        |> redirect(to: ~p"/users/log-in")
 
-        {:error, :unauthorized} ->
-          conn
-          |> put_flash(:error, "You not authorized to log out!")
-          |> redirect(to: ~p"/")
+        # {:error, :unauthorized} ->
+        #   conn
+        #   |> put_flash(:error, "You not authorized to log out!")
+        #   |> redirect(to: ~p"/")
       end
   end
 

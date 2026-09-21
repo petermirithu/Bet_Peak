@@ -100,7 +100,6 @@ defmodule BetPeak.Games do
     end
   end
 
-  @spec delete_many_by_team_id(any()) :: :ok
   def delete_many_by_team_id(team_id) do
     # Scope is already on delete team
     # Called when a team is deleted.

@@ -191,14 +191,14 @@ defmodule BetPeak.Accounts do
   end
 
   def delete_user_session_token(%Scope{} = current_scope, token) do
-    case Authorization.authorize!(current_scope, "Users", "delete") do
-      :ok ->
-        Repo.delete_all(from(UserToken, where: [token: ^token, context: "session"]))
-        :ok
+    # case Authorization.authorize!(current_scope, "Users", "delete") do
+    # :ok ->
+    Repo.delete_all(from(UserToken, where: [token: ^token, context: "session"]))
+    :ok
 
-      :unauthorized ->
-        {:error, :unauthorized}
-    end
+    # :unauthorized ->
+    # {:error, :unauthorized}
+    # end
   end
 
   defp update_user_and_delete_all_tokens(changeset) do
