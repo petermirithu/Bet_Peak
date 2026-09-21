@@ -65,6 +65,13 @@ defmodule BetPeak.AccessControlFixtures do
         setup_role_permission(super_admin, permission_3)
         setup_role_permission(super_admin, permission_4)
 
+      "Bets" ->
+        # Every one can CRUD bets
+        setup_role_permission(user, permission_1)
+        setup_role_permission(user, permission_2)
+        setup_role_permission(user, permission_3)
+        setup_role_permission(user, permission_4)
+
       _ ->
         # admin can read Sports, Teams
         setup_role_permission(admin, permission_2)
@@ -88,6 +95,7 @@ defmodule BetPeak.AccessControlFixtures do
     setup_resource_permissions(super_admin, admin, user, "Sports")
     setup_resource_permissions(super_admin, admin, user, "Teams")
     setup_resource_permissions(super_admin, admin, user, "Games")
+    setup_resource_permissions(super_admin, admin, user, "Bets")
   end
 
   def convert_user_to_admin(user, admin_option) do

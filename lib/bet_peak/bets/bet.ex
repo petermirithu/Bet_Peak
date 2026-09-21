@@ -28,14 +28,12 @@ defmodule BetPeak.Bets.Bet do
     |> cast(attrs, [
       :selection,
       :stake_amount,
-      :status,
       :user_id,
       :game_id
     ])
     |> validate_required([
       :selection,
       :stake_amount,
-      :status,
       :game_id,
       :user_id
     ])
