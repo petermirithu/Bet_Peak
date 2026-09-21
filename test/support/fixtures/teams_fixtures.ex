@@ -49,9 +49,11 @@ defmodule BetPeak.TeamsFixtures do
     valid_active_2 = get_valid_attributes(scope.user.id, sport_id)
     valid_active_3 = get_valid_attributes(scope.user.id, sport_id)
 
-    BetPeak.Teams.save_team(scope, valid_active_1)
-    BetPeak.Teams.save_team(scope, valid_active_2)
-    BetPeak.Teams.save_team(scope, valid_active_3)
+    {:ok, team_1} = BetPeak.Teams.save_team(scope, valid_active_1)
+    {:ok, team_2} = BetPeak.Teams.save_team(scope, valid_active_2)
+    {:ok, team_3} = BetPeak.Teams.save_team(scope, valid_active_3)
+
+    [team_1, team_2, team_3]
   end
 
   def add_team(scope, sport_id) do

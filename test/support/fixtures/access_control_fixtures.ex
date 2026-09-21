@@ -40,7 +40,7 @@ defmodule BetPeak.AccessControlFixtures do
     |> Repo.insert()
   end
 
-  defp setup_resource_permissions(super_admin, admin, resource_name) do
+  defp setup_resource_permissions(super_admin, admin, user, resource_name) do
     resource = setup_resource(resource_name)
 
     permission_1 = setup_permission(resource, "Create")
@@ -56,11 +56,20 @@ defmodule BetPeak.AccessControlFixtures do
         setup_role_permission(super_admin, permission_3)
         setup_role_permission(super_admin, permission_4)
 
+      "Games" ->
+        # Super admin, admin and users can read games
+        setup_role_permission(user, permission_2)
+
+        # super admin can CUD games
+        setup_role_permission(super_admin, permission_1)
+        setup_role_permission(super_admin, permission_3)
+        setup_role_permission(super_admin, permission_4)
+
       _ ->
-        # admin can read Sports
+        # admin can read Sports, Teams
         setup_role_permission(admin, permission_2)
 
-        # super admin does CUD on sports
+        # super admin does CUD on sports, teams and games
         setup_role_permission(super_admin, permission_1)
         setup_role_permission(super_admin, permission_3)
         setup_role_permission(super_admin, permission_4)
@@ -75,9 +84,10 @@ defmodule BetPeak.AccessControlFixtures do
     setup_role_inherits(user, admin)
     setup_role_inherits(admin, super_admin)
 
-    setup_resource_permissions(super_admin, admin, "Access Control")
-    setup_resource_permissions(super_admin, admin, "Sports")
-    setup_resource_permissions(super_admin, admin, "Teams")
+    setup_resource_permissions(super_admin, admin, user, "Access Control")
+    setup_resource_permissions(super_admin, admin, user, "Sports")
+    setup_resource_permissions(super_admin, admin, user, "Teams")
+    setup_resource_permissions(super_admin, admin, user, "Games")
   end
 
   def convert_user_to_admin(user, admin_option) do
